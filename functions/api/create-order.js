@@ -18,7 +18,10 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    const razorpayAuth = btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`);
+    const razorpayKeyId = String(env.RAZORPAY_KEY_ID || "").trim();
+    const razorpayKeySecret = String(env.RAZORPAY_KEY_SECRET || "").trim();
+
+    const razorpayAuth = btoa(`${razorpayKeyId}:${razorpayKeySecret}`);
 
     const orderRes = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
@@ -51,7 +54,7 @@ export async function onRequestPost(context) {
     return jsonResponse({
       success: true,
       registration_id: registrationId,
-      razorpay_key_id: env.RAZORPAY_KEY_ID,
+      razorpay_key_id: razorpayKeyId,,
       order_id: order.id,
       amount: order.amount,
       currency: order.currency
