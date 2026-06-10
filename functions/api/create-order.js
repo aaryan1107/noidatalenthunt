@@ -52,13 +52,13 @@ export async function onRequestPost(context) {
       }, 500);
     }
 
-    const razorpayAuth = btoa(${razorpayKeyId}:${razorpayKeySecret});
+    const razorpayAuth = btoa(`${razorpayKeyId}:${razorpayKeySecret}`);
 
     const orderRes = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": Basic ${razorpayAuth}
+        "Authorization": Basic ${razorpayAuth}`
       },
       body: JSON.stringify({
         amount,
