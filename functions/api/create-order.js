@@ -54,7 +54,7 @@ export async function onRequestPost(context) {
     return jsonResponse({
       success: true,
       registration_id: registrationId,
-      razorpay_key_id: razorpayKeyId,,
+      razorpay_key_id: razorpayKeyId,
       order_id: order.id,
       amount: order.amount,
       currency: order.currency
