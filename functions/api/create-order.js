@@ -58,7 +58,7 @@ export async function onRequestPost(context) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": Basic ${razorpayAuth}`
+        "Authorization": `Basic ${razorpayAuth}`
       },
       body: JSON.stringify({
         amount,
