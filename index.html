@@ -1295,6 +1295,26 @@ img, iframe, video {
   }
 }
 
+
+
+/* ── FINAL MOBILE HERO + REGISTRATION NAV HOTFIX ── */
+#registration { scroll-margin-top: 84px; }
+@media (max-width: 700px) {
+  .hero-title {
+    font-size: clamp(70px, 23vw, 96px) !important;
+    line-height: 0.86 !important;
+    letter-spacing: 1px !important;
+  }
+  .hero-title .outline {
+    -webkit-text-stroke: 1.5px var(--green-light) !important;
+  }
+}
+@media (max-width: 420px) {
+  .hero-title {
+    font-size: clamp(64px, 22vw, 84px) !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2151,6 +2171,30 @@ document.querySelectorAll('.cat-tag[data-option]').forEach(link => {
 renderSidebars();
 window.addEventListener('hashchange', openFromHash);
 openFromHash();
+</script>
+
+
+<script>
+/* Final category-click fix: category buttons must open the actual registration form, not jump back to Categories. */
+document.addEventListener('click', function(e) {
+  const trigger = e.target.closest('.cat-tag[data-option], [data-open-registration], a[href^="#register-"]');
+  if (!trigger) return;
+
+  const href = trigger.getAttribute('href') || '';
+  const slug = trigger.dataset.option || trigger.dataset.openRegistration || href.replace('#register-', '');
+
+  if (!slug || !window.REGISTRATION_CONFIG || !REGISTRATION_CONFIG[slug]) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  history.pushState(null, '', '#register-' + slug);
+  renderRegistration(slug);
+
+  requestAnimationFrame(() => {
+    document.getElementById('registration')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}, true);
 </script>
 
 </body>
