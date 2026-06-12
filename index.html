@@ -899,420 +899,14 @@ footer { background:#0A1A0F; padding:3rem 2.5rem; }
 .cart-total { display:inline-flex; padding:.55rem .8rem; border-radius:999px; background:rgba(255,255,255,.14); font-weight:900; color:#fff; }
 .cart-empty { opacity:.85; font-size:13px; }
 
-/* ─────────────────────────────────────────────
-   MOBILE RESPONSIVE HOTFIX — SAFE OVERRIDES
-   Add this at the END of <style>
-───────────────────────────────────────────── */
-
-/* prevent sideways scroll from wide cards/text */
-html, body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden !important;
+/* Mobile registration scroll target fix */
+.reg-main,
+.reg-panel,
+#registrationForm {
+  scroll-margin-top: 92px;
 }
-
-img, iframe, video {
-  max-width: 100%;
-}
-
-/* tablets */
-@media (max-width: 900px) {
-  section {
-    padding: 4rem 1.35rem !important;
-  }
-
-  .container {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  nav {
-    padding: 0 1rem !important;
-    height: 64px !important;
-  }
-
-  .nav-left {
-    min-width: 0 !important;
-  }
-
-  .nav-brand {
-    font-size: 13px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 58vw !important;
-  }
-
-  .nav-sub {
-    font-size: 8.5px !important;
-    letter-spacing: .7px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 58vw !important;
-  }
-
-  .nav-cta {
-    padding: 9px 13px !important;
-    font-size: 12px !important;
-    border-radius: 8px !important;
-    white-space: nowrap !important;
-  }
-
-  .hero {
-    min-height: auto !important;
-    padding: 92px 1.25rem 3.5rem !important;
-  }
-
-  .hero-inner {
-    grid-template-columns: 1fr !important;
-    gap: 2.4rem !important;
-  }
-
-  .hero-title {
-    font-size: clamp(54px, 18vw, 86px) !important;
-    letter-spacing: 1px !important;
-  }
-
-  .hero-tagline {
-    font-size: 17px !important;
-  }
-
-  .hero-btns a,
-  .btn-hero-primary,
-  .btn-hero-sec {
-    width: 100% !important;
-    text-align: center !important;
-  }
-
-  .prize-card {
-    padding: 1.6rem 1.2rem !important;
-    border-radius: 16px !important;
-  }
-
-  .prize-num {
-    font-size: 74px !important;
-  }
-
-  .reg-shell {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-  }
-
-  .reg-sidebar {
-    position: relative !important;
-    top: auto !important;
-    border-radius: 16px !important;
-    padding: .85rem !important;
-    overflow: hidden !important;
-  }
-
-  .reg-side-group {
-    grid-template-columns: 1fr !important;
-  }
-
-  .arena-link {
-    padding: .75rem .8rem !important;
-  }
-
-  .reg-hero {
-    padding: 1.45rem !important;
-  }
-
-  .reg-hero-inner {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-  }
-
-  .reg-title {
-    font-size: clamp(42px, 13vw, 62px) !important;
-  }
-
-  .reg-intro {
-    font-size: 14px !important;
-  }
-
-  .reg-fee-pill {
-    width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  .reg-body {
-    padding: 1rem !important;
-  }
-
-  .reg-block {
-    padding: 1rem !important;
-    border-radius: 14px !important;
-  }
-
-  .reg-block-title {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: .45rem !important;
-  }
-
-  .reg-block-title h4 {
-    font-size: 28px !important;
-  }
-
-  .info-grid,
-  .form-grid,
-  .payment-row,
-  .psl-grid,
-  .finale-inner,
-  .who-grid,
-  .why-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .field.full {
-    grid-column: auto !important;
-  }
-
-  .field input,
-  .field select,
-  .field textarea {
-    font-size: 16px !important; /* stops iPhone zoom on input focus */
-    min-height: 46px !important;
-  }
-
-  .option-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .choice {
-    grid-template-columns: 20px minmax(0, 1fr) !important;
-    width: 100% !important;
-  }
-
-  .pay-actions {
-    width: 100% !important;
-    justify-content: stretch !important;
-  }
-
-  .btn-pay,
-  .btn-secondary {
-    width: 100% !important;
-    min-width: 0 !important;
-    text-align: center !important;
-  }
-
-  .cart-summary {
-    width: 100% !important;
-  }
-
-  .cart-items {
-    padding-left: 1rem !important;
-    overflow-wrap: anywhere !important;
-  }
-}
-
-/* phones */
-@media (max-width: 560px) {
-  nav {
-    height: 60px !important;
-  }
-
-  .nav-brand {
-    font-size: 12px !important;
-    max-width: 52vw !important;
-  }
-
-  .nav-sub {
-    display: none !important;
-  }
-
-  .nav-cta {
-    font-size: 11px !important;
-    padding: 8px 10px !important;
-  }
-
-  .hero {
-    padding-top: 84px !important;
-  }
-
-  .hero-org-pill {
-    padding: 6px 10px !important;
-    margin-bottom: 1.1rem !important;
-  }
-
-  .hero-org-text {
-    font-size: 9px !important;
-    letter-spacing: .8px !important;
-  }
-
-  .hero-eyebrow {
-    font-size: 10px !important;
-    letter-spacing: 2.2px !important;
-  }
-
-  .hero-title {
-    font-size: clamp(48px, 20vw, 72px) !important;
-  }
-
-  .section-title,
-  .big-cta-title {
-    font-size: clamp(40px, 13vw, 58px) !important;
-  }
-
-  .section-body {
-    font-size: 15px !important;
-  }
-
-  .cat-grid,
-  .champ-grid,
-  .age-cards,
-  .how-steps,
-  .insta-grid,
-  .prize-cards {
-    grid-template-columns: 1fr !important;
-  }
-
-  .champ-card.hero-card,
-  .cta-card {
-    grid-column: auto !important;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: .75rem !important;
-  }
-
-  .stat-card {
-    min-height: 96px !important;
-    padding: 1.2rem .6rem !important;
-  }
-
-  .stat-n {
-    font-size: 42px !important;
-  }
-
-  .stat-l {
-    font-size: 9px !important;
-    letter-spacing: 2px !important;
-  }
-
-  .reg-topline {
-    margin-bottom: 1.4rem !important;
-  }
-
-  .reg-actions,
-  .rulebook-actions,
-  .big-cta-btns,
-  .hero-btns {
-    width: 100% !important;
-  }
-
-  .reg-mini-btn,
-  .btn-rulebook,
-  .btn-amber-lg,
-  .btn-ghost {
-    width: 100% !important;
-    text-align: center !important;
-  }
-
-  .reg-side-heading {
-    font-size: 22px !important;
-  }
-
-  .arena-link .name {
-    font-size: 13px !important;
-  }
-
-  .arena-link .tag {
-    font-size: 9px !important;
-  }
-
-  .reg-title {
-    font-size: clamp(38px, 15vw, 54px) !important;
-  }
-
-  .reg-block-title h4 {
-    font-size: 25px !important;
-  }
-
-  .rule-list {
-    columns: 1 !important;
-    margin-left: 1rem !important;
-  }
-
-  .info-card,
-  .reg-block,
-  .cat-card,
-  .how-step,
-  .psl-point {
-    border-radius: 13px !important;
-  }
-
-  .choice {
-    padding: .82rem .85rem !important;
-  }
-
-  .choice > span {
-    font-size: 13.5px !important;
-  }
-
-  .pay-chip {
-    width: 100% !important;
-    text-align: center !important;
-  }
-
-  .footer-inner {
-    align-items: flex-start !important;
-  }
-
-  .footer-right {
-    text-align: left !important;
-  }
-}
-
-/* very small phones */
-@media (max-width: 380px) {
-  section {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-  }
-
-  .hero-title {
-    font-size: 46px !important;
-  }
-
-  .prize-num {
-    font-size: 62px !important;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .reg-body {
-    padding: .85rem !important;
-  }
-
-  .reg-hero {
-    padding: 1.15rem !important;
-  }
-}
-
-
-
-/* ── FINAL MOBILE HERO + REGISTRATION NAV HOTFIX ── */
-#registration { scroll-margin-top: 84px; }
-@media (max-width: 700px) {
-  .hero-title {
-    font-size: clamp(70px, 23vw, 96px) !important;
-    line-height: 0.86 !important;
-    letter-spacing: 1px !important;
-  }
-  .hero-title .outline {
-    -webkit-text-stroke: 1.5px var(--green-light) !important;
-  }
-}
-@media (max-width: 420px) {
-  .hero-title {
-    font-size: clamp(64px, 22vw, 84px) !important;
-  }
+@media (max-width: 980px) {
+  .reg-main { scroll-margin-top: 84px; }
 }
 
 </style>
@@ -1845,6 +1439,13 @@ function commonFields(slug){
     </div>`;
 }
 
+
+function scrollToRegistrationForm() {
+  const formPanel = document.querySelector('#registration .reg-panel.visible') || document.querySelector('#registration .reg-main') || document.getElementById('registration');
+  if (!formPanel) return;
+  formPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function renderRegistration(slug){
   const cfg = REGISTRATION_CONFIG[slug];
   if(!cfg) return;
@@ -1926,7 +1527,7 @@ function renderRegistration(slug){
     </div>`;
   bindRegistrationForm();
   updateActiveLinks(slug);
-  document.getElementById('registration')?.scrollIntoView({behavior:'smooth', block:'start'});
+  scrollToRegistrationForm();
 }
 
 
@@ -2153,48 +1754,36 @@ function openFromHash(){
   if(match && REGISTRATION_CONFIG[match[1]]) renderRegistration(match[1]);
 }
 
+// Category + sidebar buttons: open the actual form and scroll to the form panel, not just #registration.
 document.addEventListener('click', e => {
-  const trigger = e.target.closest('[data-open-registration]');
-  if(trigger){
-    const slug = trigger.dataset.openRegistration;
-    location.hash = `register-${slug}`;
-    renderRegistration(slug);
-  }
-});
+  const trigger = e.target.closest('[data-open-registration], .cat-tag[data-option], a[href^="#register-"]');
+  if(!trigger) return;
+
+  const href = trigger.getAttribute('href') || '';
+  const slug = trigger.dataset.openRegistration || trigger.dataset.option || href.replace('#register-', '');
+
+  if(!slug || !REGISTRATION_CONFIG[slug]) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  history.pushState(null, '', `#register-${slug}`);
+  renderRegistration(slug);
+
+  requestAnimationFrame(() => {
+    scrollToRegistrationForm();
+  });
+}, true);
+
 document.querySelectorAll('.cat-tag[data-option]').forEach(link => {
   const slug = link.dataset.option;
   if(REGISTRATION_CONFIG[slug]){
     link.setAttribute('href', `#register-${slug}`);
-    link.addEventListener('click', () => setTimeout(() => renderRegistration(slug), 0));
   }
 });
 renderSidebars();
 window.addEventListener('hashchange', openFromHash);
 openFromHash();
-</script>
-
-
-<script>
-/* Final category-click fix: category buttons must open the actual registration form, not jump back to Categories. */
-document.addEventListener('click', function(e) {
-  const trigger = e.target.closest('.cat-tag[data-option], [data-open-registration], a[href^="#register-"]');
-  if (!trigger) return;
-
-  const href = trigger.getAttribute('href') || '';
-  const slug = trigger.dataset.option || trigger.dataset.openRegistration || href.replace('#register-', '');
-
-  if (!slug || !window.REGISTRATION_CONFIG || !REGISTRATION_CONFIG[slug]) return;
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  history.pushState(null, '', '#register-' + slug);
-  renderRegistration(slug);
-
-  requestAnimationFrame(() => {
-    document.getElementById('registration')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-}, true);
 </script>
 
 </body>
