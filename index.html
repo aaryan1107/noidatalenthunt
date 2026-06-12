@@ -899,14 +899,237 @@ footer { background:#0A1A0F; padding:3rem 2.5rem; }
 .cart-total { display:inline-flex; padding:.55rem .8rem; border-radius:999px; background:rgba(255,255,255,.14); font-weight:900; color:#fff; }
 .cart-empty { opacity:.85; font-size:13px; }
 
-/* Mobile registration scroll target fix */
-.reg-main,
-.reg-panel,
-#registrationForm {
-  scroll-margin-top: 92px;
+
+/* =========================================================
+   MOBILE RESPONSIVE HOTFIX - SAFE OVERRIDE
+   Add at the END of <style>. Keeps desktop intact.
+   ========================================================= */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, iframe, video { max-width: 100%; }
+
+@media (max-width: 820px) {
+  nav {
+    height: auto !important;
+    min-height: 62px !important;
+    padding: 0.72rem 1rem !important;
+    gap: 0.75rem !important;
+  }
+  .nav-left { min-width: 0 !important; }
+  .nav-brand { font-size: 13px !important; line-height: 1.15 !important; }
+  .nav-sub { font-size: 8.5px !important; letter-spacing: .7px !important; line-height: 1.25 !important; }
+  .nav-right { margin-left: auto !important; }
+  .nav-links { display: none !important; }
+  .nav-cta {
+    font-size: 12px !important;
+    padding: 9px 12px !important;
+    white-space: nowrap !important;
+    border-radius: 999px !important;
+  }
+
+  section { padding: 3.6rem 1rem !important; }
+  .container { width: 100% !important; max-width: 100% !important; }
+
+  .hero {
+    min-height: auto !important;
+    padding: 105px 1rem 3.2rem !important;
+    align-items: flex-start !important;
+  }
+  .hero-inner {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+  .hero-org-pill {
+    margin-bottom: 1rem !important;
+    padding: 7px 11px !important;
+  }
+  .hero-org-text {
+    white-space: normal !important;
+    font-size: 9.5px !important;
+    letter-spacing: 1px !important;
+  }
+  .hero-eyebrow {
+    font-size: 10px !important;
+    letter-spacing: 2.2px !important;
+  }
+  .hero-title {
+    font-size: clamp(64px, 22vw, 92px) !important;
+    line-height: .86 !important;
+    letter-spacing: 1.2px !important;
+    overflow-wrap: normal !important;
+  }
+  .hero-title .outline { -webkit-text-stroke: 1.4px var(--green-light) !important; }
+  .hero-tagline {
+    font-size: 16px !important;
+    line-height: 1.55 !important;
+    margin: 1rem 0 1.4rem !important;
+  }
+  .hero-btns { gap: .75rem !important; }
+  .btn-hero-primary, .btn-hero-sec {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 14px 18px !important;
+  }
+  .prize-card {
+    padding: 1.5rem 1rem !important;
+    border-radius: 16px !important;
+  }
+  .prize-num { font-size: 74px !important; }
+  .prize-fact { font-size: 13px !important; }
+  .hero-scroll { display: none !important; }
+
+  .section-title {
+    font-size: clamp(42px, 14vw, 62px) !important;
+    line-height: .92 !important;
+  }
+  .section-body { font-size: 15px !important; line-height: 1.75 !important; }
+
+  .why-grid,
+  .psl-grid,
+  .finale-inner,
+  .who-grid,
+  .reg-shell,
+  .reg-hero-inner {
+    grid-template-columns: 1fr !important;
+    gap: 1.35rem !important;
+  }
+
+  .cat-grid,
+  .info-grid,
+  .form-grid,
+  .rulebook-preview,
+  .psl-points,
+  .how-steps,
+  .age-cards,
+  .prize-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  .registration-studio { padding-left: 0 !important; padding-right: 0 !important; }
+  .registration-studio > .container { padding: 0 .85rem !important; }
+  .reg-topline {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .reg-actions {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    padding-bottom: .25rem !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .reg-mini-btn {
+    flex: 0 0 auto !important;
+    font-size: 11px !important;
+    padding: .7rem .85rem !important;
+  }
+  .reg-sidebar {
+    position: relative !important;
+    top: auto !important;
+    border-radius: 16px !important;
+    padding: .75rem !important;
+    box-shadow: 0 10px 28px rgba(27,94,59,.08) !important;
+  }
+  .reg-side-group {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: .45rem !important;
+  }
+  .reg-side-heading { font-size: 22px !important; }
+  .arena-link {
+    padding: .78rem .82rem !important;
+    border-radius: 11px !important;
+  }
+  .arena-link .name { font-size: 13px !important; }
+  .arena-link .tag { font-size: 9px !important; }
+
+  .reg-panel { border-radius: 16px !important; }
+  .reg-hero { padding: 1.35rem 1rem !important; }
+  .reg-title {
+    font-size: clamp(48px, 16vw, 70px) !important;
+    line-height: .88 !important;
+  }
+  .reg-intro {
+    font-size: 13.5px !important;
+    line-height: 1.65 !important;
+  }
+  .reg-fee-pill {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: .9rem !important;
+  }
+  .reg-body { padding: 1rem !important; }
+  .reg-block {
+    padding: 1rem !important;
+    border-radius: 14px !important;
+    margin-top: .85rem !important;
+  }
+  .reg-block-title {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: .35rem !important;
+  }
+  .reg-block-title h4 { font-size: 28px !important; }
+  .rule-list { columns: 1 !important; margin-left: 1rem !important; }
+
+  .field label, .option-title { font-size: 12.5px !important; }
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px !important; /* prevents iPhone zoom */
+    padding: .82rem .85rem !important;
+    border-radius: 10px !important;
+  }
+
+  .option-grid {
+    grid-template-columns: 1fr !important;
+    gap: .6rem !important;
+  }
+  .choice {
+    grid-template-columns: 20px minmax(0, 1fr) !important;
+    padding: .82rem .85rem !important;
+    border-radius: 12px !important;
+    font-size: 13.5px !important;
+  }
+  .choice > span {
+    font-size: 13.5px !important;
+    line-height: 1.38 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .payment-row { grid-template-columns: 1fr !important; }
+  .pay-summary { width: 100% !important; }
+  .pay-chip { font-size: 11.5px !important; }
+  .pay-actions {
+    width: 100% !important;
+    justify-content: stretch !important;
+  }
+  .btn-pay,
+  .btn-secondary,
+  .btn-rulebook {
+    width: 100% !important;
+    min-width: 0 !important;
+    text-align: center !important;
+  }
+  .cart-summary {
+    padding: .85rem !important;
+    border-radius: 12px !important;
+  }
+  .cart-items { font-size: 12.5px !important; }
+  .cart-total { width: 100% !important; justify-content: center !important; }
+
+  .footer-inner { flex-direction: column !important; align-items: flex-start !important; }
+  .footer-right { text-align: left !important; }
 }
-@media (max-width: 980px) {
-  .reg-main { scroll-margin-top: 84px; }
+
+@media (max-width: 420px) {
+  .hero-title { font-size: clamp(58px, 24vw, 82px) !important; }
+  .reg-title { font-size: clamp(44px, 17vw, 62px) !important; }
+  .section-title { font-size: clamp(38px, 15vw, 54px) !important; }
+  .prize-big { font-size: 86px !important; }
+  .stats-grid { grid-template-columns: 1fr !important; }
 }
 
 </style>
@@ -1439,13 +1662,6 @@ function commonFields(slug){
     </div>`;
 }
 
-
-function scrollToRegistrationForm() {
-  const formPanel = document.querySelector('#registration .reg-panel.visible') || document.querySelector('#registration .reg-main') || document.getElementById('registration');
-  if (!formPanel) return;
-  formPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
 function renderRegistration(slug){
   const cfg = REGISTRATION_CONFIG[slug];
   if(!cfg) return;
@@ -1527,7 +1743,7 @@ function renderRegistration(slug){
     </div>`;
   bindRegistrationForm();
   updateActiveLinks(slug);
-  scrollToRegistrationForm();
+  document.getElementById('registration')?.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 
@@ -1754,36 +1970,48 @@ function openFromHash(){
   if(match && REGISTRATION_CONFIG[match[1]]) renderRegistration(match[1]);
 }
 
-// Category + sidebar buttons: open the actual form and scroll to the form panel, not just #registration.
 document.addEventListener('click', e => {
-  const trigger = e.target.closest('[data-open-registration], .cat-tag[data-option], a[href^="#register-"]');
-  if(!trigger) return;
-
-  const href = trigger.getAttribute('href') || '';
-  const slug = trigger.dataset.openRegistration || trigger.dataset.option || href.replace('#register-', '');
-
-  if(!slug || !REGISTRATION_CONFIG[slug]) return;
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  history.pushState(null, '', `#register-${slug}`);
-  renderRegistration(slug);
-
-  requestAnimationFrame(() => {
-    scrollToRegistrationForm();
-  });
-}, true);
-
+  const trigger = e.target.closest('[data-open-registration]');
+  if(trigger){
+    const slug = trigger.dataset.openRegistration;
+    location.hash = `register-${slug}`;
+    renderRegistration(slug);
+  }
+});
 document.querySelectorAll('.cat-tag[data-option]').forEach(link => {
   const slug = link.dataset.option;
   if(REGISTRATION_CONFIG[slug]){
     link.setAttribute('href', `#register-${slug}`);
+    link.addEventListener('click', () => setTimeout(() => renderRegistration(slug), 0));
   }
 });
 renderSidebars();
 window.addEventListener('hashchange', openFromHash);
 openFromHash();
+</script>
+
+
+<script id="mobileRegistrationScrollFix">
+(function(){
+  function scrollToActualRegistrationPanel(){
+    const target = document.querySelector('#registration .reg-panel.visible') || document.querySelector('#registrationForm') || document.querySelector('#registration .reg-main');
+    if(!target) return;
+    setTimeout(function(){
+      const nav = document.querySelector('nav');
+      const offset = (nav ? nav.getBoundingClientRect().height : 70) + 14;
+      const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }, 80);
+  }
+  document.addEventListener('click', function(e){
+    const trigger = e.target.closest('[data-open-registration], .cat-tag[data-option], a[href^="#register-"]');
+    if(!trigger) return;
+    setTimeout(scrollToActualRegistrationPanel, 140);
+  }, true);
+  window.addEventListener('hashchange', function(){
+    if(location.hash.indexOf('#register-') === 0) setTimeout(scrollToActualRegistrationPanel, 180);
+  });
+})();
 </script>
 
 </body>
