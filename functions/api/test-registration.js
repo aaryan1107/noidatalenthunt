@@ -18,7 +18,18 @@ export async function onRequestGet(context) {
       }, 500);
     }
 
-    const res = await fetch(supabaseRestUrl(env, "registrations?select=id&limit=1"), {
+    const checkedColumns = [
+      "id",
+      "amount",
+      "currency",
+      "payment_status",
+      "razorpay_order_id",
+      "razorpay_payment_id",
+      "form_data",
+      "selected_options"
+    ];
+
+    const res = await fetch(supabaseRestUrl(env, `registrations?select=${checkedColumns.join(",")}&limit=1`), {
       method: "GET",
       headers: {
         "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
@@ -39,6 +50,7 @@ export async function onRequestGet(context) {
     return jsonResponse({
       success: true,
       message: "Cloudflare Function and Supabase connection are working.",
+      checked_columns: checkedColumns,
       supabase_response: text ? JSON.parse(text) : []
     });
 
