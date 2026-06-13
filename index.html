@@ -568,6 +568,7 @@ footer { background:#0A1A0F; padding:3rem 2.5rem; }
 .pay-actions { display:flex; flex-wrap:wrap; gap:.75rem; justify-content:flex-end; }
 .btn-pay { background:var(--amber); color:#fff; border:0; border-radius:10px; font-size:15px; font-weight:900; padding:1rem 1.25rem; cursor:pointer; font-family:'Outfit',sans-serif; transition:.16s; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; }
 .btn-pay:hover { background:var(--amber-mid); transform:translateY(-1px); }
+.btn-pay:disabled { opacity:.65; cursor:not-allowed; transform:none; }
 .btn-secondary { background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.22); border-radius:10px; font-size:14px; font-weight:800; padding:1rem 1.1rem; cursor:pointer; font-family:'Outfit',sans-serif; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
 .form-status { margin-top:1rem; border-radius:12px; padding:.85rem 1rem; font-size:13px; line-height:1.6; display:none; }
 .form-status.ok { display:block; background:var(--green-bg); border:1px solid var(--green-pale); color:var(--green); }
@@ -1400,7 +1401,8 @@ function renderField(field){
   if(field.type === 'radio' || field.type === 'checkbox'){
     const type = field.type;
     const max = field.max ? `data-max="${field.max}"` : '';
-    return `<div class="field full option-field" ${max} data-field-name="${escapeHtml(field.name)}">
+    const requiredOption = field.optional ? '' : 'data-required-option="true"';
+    return `<div class="field full option-field" ${max} ${requiredOption} data-option-type="${type}" data-field-name="${escapeHtml(field.name)}">
       <div class="option-title">${escapeHtml(field.label)} ${field.optional ? '' : '<span class="required-dot">*</span>'}</div>
       ${field.hint ? `<div class="hint">${escapeHtml(field.hint)}</div>` : ''}
       <div class="option-grid">
@@ -1514,11 +1516,12 @@ function renderRegistration(slug){
 
 
 const FEE_PER_ITEM = 70000;
-const CART_FIELD_BY_SLUG = {
-  'badminton': 'badminton_events',
-  'shooting': 'shooting_events',
-  'table-tennis': 'tt_categories'
+const CART_FIELDS_BY_SLUG = {
+  'badminton': ['badminton_events'],
+  'table-tennis': ['tt_categories'],
+  'chess': ['chess_age_categories']
 };
+let paymentFlowInProgress = false;
 
 function normalizeToArray(value){
   if(Array.isArray(value)) return value.filter(Boolean);
@@ -1526,45 +1529,42 @@ function normalizeToArray(value){
   return [];
 }
 
+function makeCartItem(cfg, label, index){
+  return {
+    item_no: index + 1,
+    event: cfg.title,
+    arena: cfg.arena,
+    label,
+    amount: FEE_PER_ITEM,
+    currency: 'INR'
+  };
+}
+
 function buildCartItems(slug, data){
   const cfg = REGISTRATION_CONFIG[slug];
-  const cartField = CART_FIELD_BY_SLUG[slug];
 
   if(slug === 'shooting'){
     const selected = [
       ...normalizeToArray(data.shooting_events),
       ...(data.shooting_entry_type === 'Team Entry' ? normalizeToArray(data.team_entry_events) : [])
     ];
-    return selected.map((label, index) => ({
-      item_no: index + 1,
-      event: cfg.title,
-      arena: cfg.arena,
-      label,
-      amount: FEE_PER_ITEM,
-      currency: 'INR'
-    }));
+    return selected.map((label, index) => makeCartItem(cfg, label, index));
   }
 
-  if(cartField){
-    const selected = normalizeToArray(data[cartField]);
-    return selected.map((label, index) => ({
-      item_no: index + 1,
-      event: cfg.title,
-      arena: cfg.arena,
-      label,
-      amount: FEE_PER_ITEM,
-      currency: 'INR'
-    }));
+  if(slug === 'swimming'){
+    const group = String(data.swimming_group || '').trim();
+    const events = normalizeToArray(data.swimming_events);
+    if(!group || !events.length) return [];
+    return [makeCartItem(cfg, `${group} — ${events.join(', ')}`, 0)];
   }
 
-  return [{
-    item_no: 1,
-    event: cfg.title,
-    arena: cfg.arena,
-    label: `${cfg.title} Registration`,
-    amount: FEE_PER_ITEM,
-    currency: 'INR'
-  }];
+  const cartFields = CART_FIELDS_BY_SLUG[slug];
+  if(cartFields){
+    const selected = cartFields.flatMap(field => normalizeToArray(data[field]));
+    return selected.map((label, index) => makeCartItem(cfg, label, index));
+  }
+
+  return [makeCartItem(cfg, `${cfg.title} Registration`, 0)];
 }
 
 function updatePaymentSummary(form){
@@ -1583,6 +1583,23 @@ function updatePaymentSummary(form){
 }
 
 
+function validateRequiredOptionGroups(form, status){
+  const requiredGroups = [...form.querySelectorAll('.option-field[data-required-option="true"]')];
+
+  for(const group of requiredGroups){
+    const checked = group.querySelectorAll('input:checked');
+    if(!checked.length){
+      const label = group.querySelector('.option-title')?.textContent?.replace('*','').trim() || 'required option';
+      status.className = 'form-status warn';
+      status.textContent = `Please select ${label}.`;
+      group.scrollIntoView({ behavior:'smooth', block:'center' });
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function validateLogicalRules(slug, data, status){
   if(slug === 'badminton'){
     const selected = normalizeToArray(data.badminton_events);
@@ -1599,7 +1616,12 @@ function validateLogicalRules(slug, data, status){
     const entryType = String(data.shooting_entry_type || '').trim();
     const teamEvents = normalizeToArray(data.team_entry_events);
     const teamMembers = String(data.team_member_names || '').trim();
-    if(entryType === 'Team Entry' && teamEvents.length && (!teamMembers || teamMembers.toLowerCase() === 'na')){
+    if(entryType === 'Team Entry' && !teamEvents.length){
+      status.className = 'form-status warn';
+      status.textContent = 'Please select at least one shooting team entry event.';
+      return false;
+    }
+    if(entryType === 'Team Entry' && (!teamMembers || teamMembers.toLowerCase() === 'na')){
       status.className = 'form-status warn';
       status.textContent = 'Please enter team member names for selected shooting team entry event(s).';
       return false;
@@ -1631,12 +1653,29 @@ function bindRegistrationForm(){
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const status = document.getElementById('formStatus');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton?.textContent || 'Pay & Register';
+    const setBusy = (busy, label = originalButtonText) => {
+      paymentFlowInProgress = busy;
+      if(submitButton){
+        submitButton.disabled = busy;
+        submitButton.textContent = label;
+      }
+    };
     const slug = form.dataset.registrationSlug;
     const cfg = REGISTRATION_CONFIG[slug];
+
+    if(paymentFlowInProgress){
+      status.className = 'form-status warn';
+      status.textContent = 'Payment is already being processed. Please do not click Pay & Register again.';
+      return;
+    }
+
     if(!form.checkValidity()){
       form.reportValidity();
       return;
     }
+    if(!validateRequiredOptionGroups(form, status)) return;
     const data = collectFormData(form);
     if(!validateLogicalRules(slug, data, status)) return;
     data.event = cfg.title;
@@ -1666,6 +1705,7 @@ function bindRegistrationForm(){
     }
 
     try {
+      setBusy(true, 'Processing...');
       status.className = 'form-status warn';
       status.textContent = 'Creating secure payment order...';
       const orderRes = await fetch(`${REGISTRATION_API_BASE}/create-order`, {
@@ -1689,29 +1729,47 @@ function bindRegistrationForm(){
           contact: data.contact || ''
         },
         theme:{ color:'#1B5E3B' },
+        modal:{
+          ondismiss:function(){
+            if(paymentFlowInProgress){
+              setBusy(false);
+              status.className = 'form-status warn';
+              status.textContent = 'Payment window closed. No new registration was confirmed unless Razorpay payment completed.';
+            }
+          }
+        },
         handler: async function(response){
-          status.className = 'form-status warn';
-          status.textContent = 'Verifying payment...';
-          const verifyRes = await fetch(`${REGISTRATION_API_BASE}/verify-payment`, {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({
-              registration_id: order.registration_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              registration : data
-            })
-          });
-          const verifyData = await verifyRes.json();
-          if(!verifyRes.ok || !verifyData.success) throw new Error(formatApiError(verifyData, 'Payment verification failed'));
-          status.className = 'form-status ok';
-          status.textContent = 'Registration confirmed. Payment has been verified successfully.';
-          form.reset();
+          try {
+            status.className = 'form-status warn';
+            status.textContent = 'Verifying payment...';
+            const verifyRes = await fetch(`${REGISTRATION_API_BASE}/verify-payment`, {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({
+                registration_id: order.registration_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                registration : data
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if(!verifyRes.ok || !verifyData.success) throw new Error(formatApiError(verifyData, 'Payment verification failed'));
+            status.className = 'form-status ok';
+            status.textContent = 'Registration confirmed. Payment has been verified successfully.';
+            form.reset();
+            updatePaymentSummary(form);
+            setBusy(false);
+          } catch(err){
+            setBusy(false);
+            status.className = 'form-status warn';
+            status.textContent = err.message || 'Payment completed but verification failed. Please contact the organiser with your payment ID.';
+          }
         }
       });
       checkout.open();
     } catch(err){
+      setBusy(false);
       status.className = 'form-status warn';
       status.textContent = err.message || 'Something went wrong while starting payment.';
     }
