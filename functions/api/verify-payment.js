@@ -97,4 +97,4 @@ export async function onRequestPost(context) {
       registration_id,
       razorpay_order_id,
       razorpay_payment_id,
-      registration: pending?.form_data || fallbackRegistration,
+      registration: pending?.form_data || fallbackRegistration
