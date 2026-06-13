@@ -215,6 +215,8 @@ function normalizeCartItems(body) {
     "tableTennisCategories",
     "tt_categories",
     "ttCategories",
+    "chess_age_categories",
+    "chessAgeCategories",
     "selected_options",
     "selectedOptions"
   ];
