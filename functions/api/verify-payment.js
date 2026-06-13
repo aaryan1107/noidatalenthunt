@@ -1,100 +1,185 @@
-const PRICE_PER_ITEM = 70000; // Rs. 700 in paise
+        "Content-Type": "application/json",
+        "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify(pendingRow)
+    });
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
+    const insertText = await insertRes.text();
 
-  try {
-    const body = await request.json();
-
-    const {
-      registration_id,
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      registration
-    } = body;
-
-    if (
-      !registration_id ||
-      !razorpay_order_id ||
-      !razorpay_payment_id ||
-      !razorpay_signature
-    ) {
+    if (!insertRes.ok) {
       return jsonResponse({
         success: false,
-        error: "Missing payment verification data."
-      }, 400);
-    }
-
-    const missing = requiredEnv(env);
-    if (missing.length > 0) {
-      return jsonResponse({
-        success: false,
-        error: "Missing payment tracking environment variables.",
-        missing
+        error: "Razorpay order created, but pending registration tracking failed.",
+        order_id: order.id,
+        registration_id: registrationId,
+        details: insertText
       }, 500);
     }
 
-    const expectedSignature = await hmacSha256Hex(
-      `${razorpay_order_id}|${razorpay_payment_id}`,
-      env.RAZORPAY_KEY_SECRET
-    );
+    return jsonResponse({
+      success: true,
+      registration_id: registrationId,
+      razorpay_key_id: razorpayKeyId,
+      order_id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      cart_count: cartItems.length,
+      cart_items: cartItems,
+      tracking_status: "PENDING_PAYMENT"
+    });
 
-    if (!timingSafeEqual(expectedSignature, razorpay_signature)) {
-      return jsonResponse({
-        success: false,
-        error: "Invalid Razorpay signature. Payment not verified."
-      }, 400);
+  } catch (error) {
+    return jsonResponse({
+      success: false,
+      error: "Server error while creating order.",
+      details: error.message
+    }, 500);
+  }
+}
+
+function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, currency, orderId }) {
+  const selectedOptions = {};
+
+  for (const [key, value] of Object.entries(body)) {
+    if (Array.isArray(value)) {
+      selectedOptions[key] = value;
     }
+  }
 
-    let payment = await fetchRazorpayPayment(env, razorpay_payment_id);
+  selectedOptions.cart_items = cartItems;
 
-    if (payment.order_id !== razorpay_order_id) {
-      return jsonResponse({
-        success: false,
-        error: "Payment order mismatch."
-      }, 400);
-    }
+  return {
+    id: registrationId,
 
-    const existing = await findExistingRegistration(env, registration_id, razorpay_order_id, razorpay_payment_id);
-    const pending = existing.find(row => row.id === registration_id) || existing[0] || null;
-    const fallbackRegistration = registration || {};
-    const expectedAmount = expectedAmountFor(pending, fallbackRegistration);
-    const expectedCurrency = (pending?.currency || fallbackRegistration.currency || "INR").toUpperCase();
+    participant_name: body.participant_name || body.participantName || body.name || "",
+    dob: body.dob || null,
+    age: body.age || null,
+    school: body.school || "",
+    contact: body.contact || "",
+    email: body.email || "",
+    id_number: body.id_number || "",
+    age_group: body.age_group || "",
+    gender: body.gender || "",
 
-    if (payment.amount !== expectedAmount || payment.currency !== expectedCurrency) {
-      return jsonResponse({
-        success: false,
-        error: "Invalid payment amount or currency.",
-        expected_amount: expectedAmount,
-        actual_amount: payment.amount,
-        expected_currency: expectedCurrency,
-        actual_currency: payment.currency
-      }, 400);
-    }
+    arena: body.arena || "",
+    event: body.event || "",
+    category_slug: slugify(body.event || ""),
+    selected_options: selectedOptions,
+    form_data: {
+      ...body,
+      cart_items: cartItems,
+      cart_count: cartItems.length,
+      amount,
+      currency,
+      registration_id: registrationId,
+      razorpay_order_id: orderId
+    },
 
-    if (pending?.payment_status === "PAID_CONFIRMED" && pending?.razorpay_payment_id === razorpay_payment_id) {
-      return jsonResponse({
-        success: true,
-        already_confirmed: true,
-        message: "Payment already verified and registration already stored.",
-        registration_id: pending.id
+    amount,
+    currency,
+    razorpay_order_id: orderId,
+    razorpay_payment_id: "",
+    payment_status: "PENDING_PAYMENT",
+    payment_method: "",
+    created_at: new Date().toISOString()
+  };
+}
+
+function normalizeCartItems(body) {
+  if (Array.isArray(body.cart_items) && body.cart_items.length > 0) {
+    return body.cart_items
+      .map(item => {
+        if (typeof item === "string") {
+          return { label: item, amount: PRICE_PER_ITEM };
+        }
+
+        return {
+          label: item.label || item.name || item.event || item.category || "Selected Event",
+          amount: PRICE_PER_ITEM
+        };
+      })
+      .filter(item => item.label);
+  }
+
+  const possibleArrayFields = [
+    "badminton_events",
+    "badmintonEvents",
+    "shooting_events",
+    "shootingEvents",
+    "team_entry_events",
+    "shooting_team_events",
+    "shootingTeamEvents",
+    "table_tennis_categories",
+    "tableTennisCategories",
+    "tt_categories",
+    "ttCategories",
+    "selected_options",
+    "selectedOptions"
+  ];
+
+  const items = [];
+
+  for (const field of possibleArrayFields) {
+    if (Array.isArray(body[field])) {
+      body[field].forEach(value => {
+        items.push({
+          label: String(value),
+          amount: PRICE_PER_ITEM
+        });
       });
     }
+  }
 
-    if (payment.status === "authorized") {
-      payment = await captureRazorpayPayment(env, razorpay_payment_id, expectedAmount);
-    }
+  return items;
+}
 
-    if (payment.status !== "captured") {
-      return jsonResponse({
-        success: false,
-        error: `Payment is not captured. Current status: ${payment.status}`
-      }, 400);
-    }
+function requiredEnv(env) {
+  const missing = [];
+  if (!env.RAZORPAY_KEY_ID) missing.push("RAZORPAY_KEY_ID");
+  if (!env.RAZORPAY_KEY_SECRET) missing.push("RAZORPAY_KEY_SECRET");
+  if (!env.SUPABASE_URL) missing.push("SUPABASE_URL");
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+  return missing;
+}
 
-    const row = buildPaidRegistrationRow({
-      registration_id,
-      razorpay_order_id,
-      razorpay_payment_id,
-      registration: pending?.form_data || fallbackRegistration
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+export async function onRequestOptions() {
+  return corsPreflight();
+}
+
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: corsHeaders()
+  });
+}
+
+function corsHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
+}
+
+function corsPreflight() {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders()
+  });
+}
+
+function supabaseRestUrl(env, path) {
+  const baseUrl = String(env.SUPABASE_URL || "").trim().replace(/\/+$/, "");
+  const cleanPath = String(path || "").replace(/^\/+/, "");
+  return `${baseUrl}/rest/v1/${cleanPath}`;
+}
