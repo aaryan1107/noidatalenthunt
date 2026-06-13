@@ -1,9 +1,10 @@
+const PRICE_PER_ITEM = 70000; // ₹700 in paise
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
     const body = await request.json();
-
     const {
       registration_id,
       razorpay_order_id,
@@ -12,17 +13,14 @@ export async function onRequestPost(context) {
       registration
     } = body;
 
-    if (
-      !registration_id ||
-      !razorpay_order_id ||
-      !razorpay_payment_id ||
-      !razorpay_signature ||
-      !registration
-    ) {
-      return jsonResponse({
-        success: false,
-        error: "Missing payment verification or registration data."
-      }, 400);
+    if (!registration_id || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !registration) {
+      return jsonResponse({ success: false, error: "Missing payment verification or registration data." }, 400);
+    }
+
+    const expectedAmount = getExpectedAmount(registration);
+
+    if (!expectedAmount || expectedAmount < PRICE_PER_ITEM) {
+      return jsonResponse({ success: false, error: "Could not calculate expected payment amount from cart data." }, 400);
     }
 
     // 1. Verify Razorpay checkout signature
@@ -32,39 +30,33 @@ export async function onRequestPost(context) {
     );
 
     if (!timingSafeEqual(expectedSignature, razorpay_signature)) {
-      return jsonResponse({
-        success: false,
-        error: "Invalid Razorpay signature. Payment not verified."
-      }, 400);
+      return jsonResponse({ success: false, error: "Invalid Razorpay signature. Payment not verified." }, 400);
     }
 
-    // 2. Fetch payment from Razorpay to confirm real status
+    // 2. Fetch payment from Razorpay to confirm real status and amount
     let payment = await fetchRazorpayPayment(env, razorpay_payment_id);
 
     if (payment.order_id !== razorpay_order_id) {
+      return jsonResponse({ success: false, error: "Payment order mismatch." }, 400);
+    }
+
+    if (payment.amount !== expectedAmount || payment.currency !== "INR") {
       return jsonResponse({
         success: false,
-        error: "Payment order mismatch."
+        error: "Invalid payment amount or currency.",
+        expected_amount: expectedAmount,
+        actual_amount: payment.amount,
+        currency: payment.currency
       }, 400);
     }
 
-    if (payment.amount !== 70000 || payment.currency !== "INR") {
-      return jsonResponse({
-        success: false,
-        error: "Invalid payment amount or currency."
-      }, 400);
-    }
-
-    // 3. If payment is authorized but not captured, capture it
+    // 3. If payment is authorized but not captured, capture exact dynamic amount
     if (payment.status === "authorized") {
-      payment = await captureRazorpayPayment(env, razorpay_payment_id, 70000);
+      payment = await captureRazorpayPayment(env, razorpay_payment_id, expectedAmount);
     }
 
     if (payment.status !== "captured") {
-      return jsonResponse({
-        success: false,
-        error: `Payment is not captured. Current status: ${payment.status}`
-      }, 400);
+      return jsonResponse({ success: false, error: `Payment is not captured. Current status: ${payment.status}` }, 400);
     }
 
     // 4. Prevent duplicate storage
@@ -114,14 +106,25 @@ export async function onRequestPost(context) {
       message: "Payment verified and registration stored successfully.",
       registration: JSON.parse(insertText)[0]
     });
-
   } catch (error) {
-    return jsonResponse({
-      success: false,
-      error: "Verification server error.",
-      details: error.message
-    }, 500);
+    return jsonResponse({ success: false, error: "Verification server error.", details: error.message }, 500);
   }
+}
+
+function getExpectedAmount(registration) {
+  if (Number.isFinite(Number(registration.amount)) && Number(registration.amount) > 0) {
+    return Number(registration.amount);
+  }
+
+  if (Array.isArray(registration.cart_items) && registration.cart_items.length > 0) {
+    return registration.cart_items.length * PRICE_PER_ITEM;
+  }
+
+  if (Number.isFinite(Number(registration.cart_count)) && Number(registration.cart_count) > 0) {
+    return Number(registration.cart_count) * PRICE_PER_ITEM;
+  }
+
+  return 0;
 }
 
 function buildRegistrationRow({ registration_id, razorpay_order_id, razorpay_payment_id, registration, payment }) {
@@ -135,7 +138,6 @@ function buildRegistrationRow({ registration_id, razorpay_order_id, razorpay_pay
 
   return {
     id: registration_id,
-
     participant_name: registration.participant_name || "",
     dob: registration.dob || null,
     age: registration.age || null,
@@ -145,13 +147,11 @@ function buildRegistrationRow({ registration_id, razorpay_order_id, razorpay_pay
     id_number: registration.id_number || "",
     age_group: registration.age_group || "",
     gender: registration.gender || "",
-
     arena: registration.arena || "",
     event: registration.event || "",
     category_slug: slugify(registration.event || ""),
     selected_options: selectedOptions,
     form_data: registration,
-
     amount: payment.amount,
     currency: payment.currency,
     razorpay_order_id,
@@ -168,9 +168,7 @@ async function fetchRazorpayPayment(env, paymentId) {
 
   const res = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
     method: "GET",
-    headers: {
-      "Authorization": `Basic ${razorpayAuth}`
-    }
+    headers: { "Authorization": `Basic ${razorpayAuth}` }
   });
 
   const data = await res.json();
@@ -191,10 +189,7 @@ async function captureRazorpayPayment(env, paymentId, amount) {
       "Content-Type": "application/json",
       "Authorization": `Basic ${razorpayAuth}`
     },
-    body: JSON.stringify({
-      amount,
-      currency: "INR"
-    })
+    body: JSON.stringify({ amount, currency: "INR" })
   });
 
   const data = await res.json();
@@ -207,7 +202,10 @@ async function captureRazorpayPayment(env, paymentId, amount) {
 }
 
 async function findExistingRegistration(env, orderId, paymentId) {
-  const url = supabaseRestUrl(env, `registrations?select=id,razorpay_order_id,razorpay_payment_id&or=(razorpay_order_id.eq.${encodeURIComponent(orderId)},razorpay_payment_id.eq.${encodeURIComponent(paymentId)})`);
+  const url = supabaseRestUrl(
+    env,
+    `registrations?select=id,razorpay_order_id,razorpay_payment_id&or=(razorpay_order_id.eq.${encodeURIComponent(orderId)},razorpay_payment_id.eq.${encodeURIComponent(paymentId)})`
+  );
 
   const res = await fetch(url, {
     method: "GET",
@@ -236,11 +234,7 @@ async function hmacSha256Hex(message, secret) {
     ["sign"]
   );
 
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    encoder.encode(message)
-  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(message));
 
   return [...new Uint8Array(signature)]
     .map(byte => byte.toString(16).padStart(2, "0"))
@@ -270,10 +264,7 @@ export async function onRequestOptions() {
 }
 
 function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: corsHeaders()
-  });
+  return new Response(JSON.stringify(data), { status, headers: corsHeaders() });
 }
 
 function corsHeaders() {
@@ -286,10 +277,7 @@ function corsHeaders() {
 }
 
 function corsPreflight() {
-  return new Response(null, {
-    status: 204,
-    headers: corsHeaders()
-  });
+  return new Response(null, { status: 204, headers: corsHeaders() });
 }
 
 function supabaseRestUrl(env, path) {
