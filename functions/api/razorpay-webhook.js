@@ -2,6 +2,20 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
+    const missing = requiredEnv(env, [
+      "RAZORPAY_WEBHOOK_SECRET",
+      "SUPABASE_URL",
+      "SUPABASE_SERVICE_ROLE_KEY"
+    ]);
+
+    if (missing.length > 0) {
+      return jsonResponse({
+        success: false,
+        error: "Missing environment variables.",
+        missing
+      }, 500);
+    }
+
     const rawBody = await request.text();
     const razorpaySignature = request.headers.get("x-razorpay-signature");
 
@@ -23,50 +37,40 @@ export async function onRequestPost(context) {
 
     const event = JSON.parse(rawBody);
     const eventType = event.event;
-
     const payment = event.payload?.payment?.entity || null;
     const order = event.payload?.order?.entity || null;
-
     const razorpayOrderId = payment?.order_id || order?.id || "";
-    const razorpayPaymentId = payment?.id || "";
 
     if (!razorpayOrderId) {
       return jsonResponse({
         success: true,
+        handled: false,
         message: "Webhook ignored. No Razorpay order ID found."
       });
     }
 
-    if (eventType === "payment.captured" || eventType === "order.paid") {
-      await updateRegistrationIfExists(env, razorpayOrderId, {
-        payment_status: "PAID_CONFIRMED",
-        razorpay_payment_id: razorpayPaymentId || undefined,
-        webhook_event: eventType,
-        payment_captured_at: new Date().toISOString()
-      });
+    const patch = buildRegistrationPatch(eventType, payment, order);
 
+    if (!patch) {
       return jsonResponse({
         success: true,
-        message: "Webhook processed."
+        handled: false,
+        event: eventType,
+        message: `Webhook event ignored: ${eventType}`
       });
     }
 
-    if (eventType === "payment.failed") {
-      await updateRegistrationIfExists(env, razorpayOrderId, {
-        payment_status: "FAILED",
-        razorpay_payment_id: razorpayPaymentId || undefined,
-        webhook_event: eventType
-      });
-
-      return jsonResponse({
-        success: true,
-        message: "Payment failure webhook processed."
-      });
-    }
+    const rows = await updateRegistrationIfExists(env, razorpayOrderId, patch);
 
     return jsonResponse({
       success: true,
-      message: `Webhook event ignored: ${eventType}`
+      handled: true,
+      matched: rows.length > 0,
+      event: eventType,
+      razorpay_order_id: razorpayOrderId,
+      message: rows.length > 0
+        ? "Webhook processed and registration updated."
+        : "Webhook processed, but no matching registration row was found."
     });
 
   } catch (error) {
@@ -78,7 +82,41 @@ export async function onRequestPost(context) {
   }
 }
 
-async function updateRegistrationIfExists(env, razorpayOrderId, data) {
+function buildRegistrationPatch(eventType, payment, order) {
+  const patch = {
+    razorpay_payment_id: payment?.id || undefined,
+    amount: typeof payment?.amount === "number" ? payment.amount : undefined,
+    currency: payment?.currency ? String(payment.currency).toUpperCase() : undefined,
+    payment_method: payment?.method || undefined
+  };
+
+  if (eventType === "payment.captured" || eventType === "order.paid") {
+    if (eventType === "order.paid" && typeof order?.amount_paid === "number") {
+      patch.amount = order.amount_paid;
+      patch.currency = order.currency ? String(order.currency).toUpperCase() : patch.currency;
+    }
+
+    patch.payment_status = "PAID_CONFIRMED";
+    patch.payment_captured_at = new Date().toISOString();
+    return cleanPatch(patch);
+  }
+
+  if (eventType === "payment.authorized") {
+    patch.payment_status = "AUTHORIZED";
+    return cleanPatch(patch);
+  }
+
+  if (eventType === "payment.failed") {
+    patch.payment_status = "FAILED";
+    patch.amount = typeof payment?.amount === "number" ? payment.amount : undefined;
+    patch.currency = payment?.currency ? String(payment.currency).toUpperCase() : undefined;
+    return cleanPatch(patch);
+  }
+
+  return null;
+}
+
+function cleanPatch(data) {
   const cleanData = {};
 
   for (const [key, value] of Object.entries(data)) {
@@ -87,20 +125,28 @@ async function updateRegistrationIfExists(env, razorpayOrderId, data) {
     }
   }
 
+  return cleanData;
+}
+
+async function updateRegistrationIfExists(env, razorpayOrderId, data) {
   const res = await fetch(supabaseRestUrl(env, `registrations?razorpay_order_id=eq.${encodeURIComponent(razorpayOrderId)}`), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
-      "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`
+      "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+      "Prefer": "return=representation"
     },
-    body: JSON.stringify(cleanData)
+    body: JSON.stringify(data)
   });
 
+  const text = await res.text();
+
   if (!res.ok) {
-    const text = await res.text();
     throw new Error(`Supabase webhook update failed: ${text}`);
   }
+
+  return text ? JSON.parse(text) : [];
 }
 
 async function hmacSha256Hex(message, secret) {
@@ -134,6 +180,10 @@ function timingSafeEqual(a, b) {
   }
 
   return result === 0;
+}
+
+function requiredEnv(env, names) {
+  return names.filter(name => !String(env[name] || "").trim());
 }
 
 export async function onRequestOptions() {
