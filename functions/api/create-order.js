@@ -1,50 +1,30 @@
-const PRICE_PER_ITEM = 70000; // Rs. 700 in paise
+const PRICE_PER_ITEM = 70000; // ₹700 in paise
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
     const body = await request.json();
-
-    const participantName =
-      body.participant_name ||
-      body.participantName ||
-      body.name ||
-      "";
-
+    const participantName = body.participant_name || body.participantName || body.name || "";
     const arena = body.arena || "";
     const eventName = body.event || "";
 
     if (!participantName || !eventName) {
-      return jsonResponse({
-        success: false,
-        error: "Missing participant name or event."
-      }, 400);
+      return jsonResponse({ success: false, error: "Missing participant name or event." }, 400);
     }
 
     const missing = requiredEnv(env);
     if (missing.length > 0) {
-      return jsonResponse({
-        success: false,
-        error: "Missing payment tracking environment variables.",
-        missing
-      }, 500);
+      return jsonResponse({ success: false, error: "Missing payment tracking environment variables.", missing }, 500);
     }
 
-    const cartItems = normalizeCartItems(body);
-
+    const cartItems = normalizeCartItems(body, arena, eventName);
     if (cartItems.length === 0) {
-      return jsonResponse({
-        success: false,
-        error: "Please select at least one event/category."
-      }, 400);
+      return jsonResponse({ success: false, error: "Please select at least one event/category." }, 400);
     }
 
     if (eventName.toLowerCase().includes("table tennis") && cartItems.length > 2) {
-      return jsonResponse({
-        success: false,
-        error: "Table Tennis allows a maximum of 2 categories only."
-      }, 400);
+      return jsonResponse({ success: false, error: "Table Tennis allows a maximum of 2 categories only." }, 400);
     }
 
     const amount = cartItems.length * PRICE_PER_ITEM;
@@ -59,7 +39,7 @@ export async function onRequestPost(context) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Basic ${razorpayAuth}`
+        Authorization: `Basic ${razorpayAuth}`,
       },
       body: JSON.stringify({
         amount,
@@ -71,19 +51,14 @@ export async function onRequestPost(context) {
           arena,
           event: eventName,
           cart_count: String(cartItems.length),
-          cart_items: cartItems.map(item => item.label).join(" | ")
-        }
-      })
+          cart_items: cartItems.map((item) => item.label).join(" | "),
+        },
+      }),
     });
 
     const order = await orderRes.json();
-
     if (!orderRes.ok) {
-      return jsonResponse({
-        success: false,
-        error: "Failed to create Razorpay order.",
-        details: order
-      }, 500);
+      return jsonResponse({ success: false, error: "Failed to create Razorpay order.", details: order }, 500);
     }
 
     const pendingRow = buildPendingRegistrationRow({
@@ -92,30 +67,32 @@ export async function onRequestPost(context) {
       cartItems,
       amount,
       currency,
-      orderId: order.id
+      orderId: order.id,
     });
 
     const insertRes = await fetch(supabaseRestUrl(env, "registrations"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
-        "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-        "Prefer": "return=representation"
+        apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+        Prefer: "return=representation",
       },
-      body: JSON.stringify(pendingRow)
+      body: JSON.stringify(pendingRow),
     });
 
     const insertText = await insertRes.text();
-
     if (!insertRes.ok) {
-      return jsonResponse({
-        success: false,
-        error: "Razorpay order created, but pending registration tracking failed.",
-        order_id: order.id,
-        registration_id: registrationId,
-        details: insertText
-      }, 500);
+      return jsonResponse(
+        {
+          success: false,
+          error: "Razorpay order created, but pending registration tracking failed.",
+          order_id: order.id,
+          registration_id: registrationId,
+          details: insertText,
+        },
+        500,
+      );
     }
 
     return jsonResponse({
@@ -127,32 +104,26 @@ export async function onRequestPost(context) {
       currency: order.currency,
       cart_count: cartItems.length,
       cart_items: cartItems,
-      tracking_status: "PENDING_PAYMENT"
+      tracking_status: "PENDING_PAYMENT",
     });
-
   } catch (error) {
-    return jsonResponse({
-      success: false,
-      error: "Server error while creating order.",
-      details: error.message
-    }, 500);
+    return jsonResponse({ success: false, error: "Server error while creating order.", details: error.message }, 500);
   }
+}
+
+export async function onRequestOptions() {
+  return corsPreflight();
 }
 
 function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, currency, orderId }) {
   const selectedOptions = {};
-
   for (const [key, value] of Object.entries(body)) {
-    if (Array.isArray(value)) {
-      selectedOptions[key] = value;
-    }
+    if (Array.isArray(value)) selectedOptions[key] = value;
   }
-
   selectedOptions.cart_items = cartItems;
 
   return {
     id: registrationId,
-
     participant_name: body.participant_name || body.participantName || body.name || "",
     dob: body.dob || null,
     age: body.age || null,
@@ -162,7 +133,6 @@ function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, 
     id_number: body.id_number || "",
     age_group: body.age_group || "",
     gender: body.gender || "",
-
     arena: body.arena || "",
     event: body.event || "",
     category_slug: slugify(body.event || ""),
@@ -174,33 +144,28 @@ function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, 
       amount,
       currency,
       registration_id: registrationId,
-      razorpay_order_id: orderId
+      razorpay_order_id: orderId,
     },
-
     amount,
     currency,
     razorpay_order_id: orderId,
     razorpay_payment_id: "",
     payment_status: "PENDING_PAYMENT",
     payment_method: "",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 }
 
-function normalizeCartItems(body) {
+function normalizeCartItems(body, arena, eventName) {
   if (Array.isArray(body.cart_items) && body.cart_items.length > 0) {
     return body.cart_items
-      .map(item => {
+      .map((item, index) => {
         if (typeof item === "string") {
-          return { label: item, amount: PRICE_PER_ITEM };
+          return buildCartItem(item, arena, eventName, index + 1);
         }
-
-        return {
-          label: item.label || item.name || item.event || item.category || "Selected Event",
-          amount: PRICE_PER_ITEM
-        };
+        return buildCartItem(item.label || item.name || item.event || item.category || "Selected Event", arena, eventName, index + 1);
       })
-      .filter(item => item.label);
+      .filter((item) => item.label);
   }
 
   const possibleArrayFields = [
@@ -216,23 +181,20 @@ function normalizeCartItems(body) {
     "tt_categories",
     "ttCategories",
     "selected_options",
-    "selectedOptions"
+    "selectedOptions",
   ];
 
   const items = [];
-
   for (const field of possibleArrayFields) {
     if (Array.isArray(body[field])) {
-      body[field].forEach(value => {
-        items.push({
-          label: String(value),
-          amount: PRICE_PER_ITEM
-        });
-      });
+      body[field].forEach((value) => items.push(buildCartItem(String(value), arena, eventName, items.length + 1)));
     }
   }
-
   return items;
+}
+
+function buildCartItem(label, arena, eventName, itemNo) {
+  return { label, arena, event: eventName, amount: PRICE_PER_ITEM, currency: "INR", item_no: itemNo };
 }
 
 function requiredEnv(env) {
@@ -251,15 +213,8 @@ function slugify(value) {
     .replace(/(^-|-$)/g, "");
 }
 
-export async function onRequestOptions() {
-  return corsPreflight();
-}
-
 function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: corsHeaders()
-  });
+  return new Response(JSON.stringify(data), { status, headers: corsHeaders() });
 }
 
 function corsHeaders() {
@@ -267,15 +222,12 @@ function corsHeaders() {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
+    "Access-Control-Allow-Headers": "Content-Type",
   };
 }
 
 function corsPreflight() {
-  return new Response(null, {
-    status: 204,
-    headers: corsHeaders()
-  });
+  return new Response(null, { status: 204, headers: corsHeaders() });
 }
 
 function supabaseRestUrl(env, path) {
