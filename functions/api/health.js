@@ -1,5 +1,13 @@
 export async function onRequestGet(context) {
-  const { env } = context;
+  const { request, env } = context;
+
+  if (!isAdminRequest(request, env)) {
+    return jsonResponse({
+      success: false,
+      error: "Not found."
+    }, 404);
+  }
+
   const required = [
     "RAZORPAY_KEY_ID",
     "RAZORPAY_KEY_SECRET",
@@ -40,8 +48,14 @@ function jsonResponse(data, status = 200) {
 function corsHeaders() {
   return {
     "Content-Type": "application/json",
+    "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
+    "Access-Control-Allow-Headers": "Content-Type, x-admin-token"
   };
+}
+
+function isAdminRequest(request, env) {
+  const token = String(env.ADMIN_API_TOKEN || "").trim();
+  return Boolean(token) && request.headers.get("x-admin-token") === token;
 }

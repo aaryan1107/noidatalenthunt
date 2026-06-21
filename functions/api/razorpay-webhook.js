@@ -76,8 +76,7 @@ export async function onRequestPost(context) {
   } catch (error) {
     return jsonResponse({
       success: false,
-      error: "Webhook server error.",
-      details: error.message
+      error: "Webhook server error."
     }, 500);
   }
 }
@@ -200,6 +199,7 @@ function jsonResponse(data, status = 200) {
 function corsHeaders() {
   return {
     "Content-Type": "application/json",
+    "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, x-razorpay-signature"

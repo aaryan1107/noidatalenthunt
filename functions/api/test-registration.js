@@ -1,7 +1,14 @@
 export async function onRequestGet(context) {
-  const { env } = context;
+  const { request, env } = context;
 
   try {
+    if (!isAdminRequest(request, env)) {
+      return jsonResponse({
+        success: false,
+        error: "Not found."
+      }, 404);
+    }
+
     const missing = [];
 
     if (!env.RAZORPAY_KEY_ID) missing.push("RAZORPAY_KEY_ID");
@@ -42,8 +49,7 @@ export async function onRequestGet(context) {
     if (!res.ok) {
       return jsonResponse({
         success: false,
-        error: "Supabase connection failed.",
-        details: text
+        error: "Supabase connection failed."
       }, 500);
     }
 
@@ -57,8 +63,7 @@ export async function onRequestGet(context) {
   } catch (error) {
     return jsonResponse({
       success: false,
-      error: "Test failed.",
-      details: error.message
+      error: "Test failed."
     }, 500);
   }
 }
@@ -68,7 +73,9 @@ function jsonResponse(data, status = 200) {
     status,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*"
+      "Cache-Control": "no-store",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type, x-admin-token"
     }
   });
 }
@@ -77,4 +84,9 @@ function supabaseRestUrl(env, path) {
   const baseUrl = String(env.SUPABASE_URL || "").trim().replace(/\/+$/, "");
   const cleanPath = String(path || "").replace(/^\/+/, "");
   return `${baseUrl}/rest/v1/${cleanPath}`;
+}
+
+function isAdminRequest(request, env) {
+  const token = String(env.ADMIN_API_TOKEN || "").trim();
+  return Boolean(token) && request.headers.get("x-admin-token") === token;
 }

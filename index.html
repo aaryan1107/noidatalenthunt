@@ -1737,7 +1737,7 @@ function commonFields(slug){
       ${isChess ? '<div class="field"><label>Age <span class="required-dot">*</span></label><input name="age" type="number" required placeholder="Enter age"></div>' : ''}
       <div class="field"><label>Date of Birth <span class="required-dot">*</span></label><input name="dob" type="date" required></div>
       <div class="field"><label>Name of the School / Academy <span class="required-dot">*</span></label><input name="school" required placeholder="Enter school name"></div>
-      <div class="field"><label>Coach / Parent's Contact No. <span class="required-dot">*</span></label><input name="contact" required placeholder="Enter mobile number"></div>
+      <div class="field"><label>Coach / Parent's Contact No. <span class="required-dot">*</span></label><input name="contact" type="tel" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" required placeholder="10-digit mobile number"></div>
       <div class="field"><label>Email ID <span class="required-dot">*</span></label><input name="email" type="email" required placeholder="Enter email ID"></div>
       <div class="field"><label>Aadhaar No. / Passport No. of Participant <span class="required-dot">*</span></label><input name="id_number" required placeholder="Enter ID number"></div>
       <div class="field"><label>Age Group <span class="required-dot">*</span></label><select name="age_group" required><option value="">Select</option><option>5-8 (Little Stars)</option><option>9-12 (Rising Talents)</option><option>13-17 (Challengers)</option><option>18-24 (Open Category)</option></select></div>

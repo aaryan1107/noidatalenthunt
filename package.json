@@ -1,6 +1,7 @@
 {
   "name": "noida-talent-hunt",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "wrangler pages dev . --compatibility-date=2026-06-13",

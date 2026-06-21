@@ -61,6 +61,22 @@ export async function onRequestPost(context) {
     const fallbackRegistration = registration || {};
     const expectedAmount = expectedAmountFor(pending, fallbackRegistration);
     const expectedCurrency = (pending?.currency || fallbackRegistration.currency || "INR").toUpperCase();
+    const mobileNumber = normalizeMobileNumber(pending?.contact || fallbackRegistration.contact);
+
+    if (!mobileNumber) {
+      return jsonResponse({
+        success: false,
+        error: "Invalid mobile number on registration."
+      }, 400);
+    }
+
+    fallbackRegistration.contact = mobileNumber;
+    if (pending?.form_data) {
+      pending.form_data.contact = mobileNumber;
+    }
+    if (pending) {
+      pending.contact = mobileNumber;
+    }
 
     if (payment.amount !== expectedAmount || payment.currency !== expectedCurrency) {
       return jsonResponse({
@@ -115,8 +131,7 @@ export async function onRequestPost(context) {
   } catch (error) {
     return jsonResponse({
       success: false,
-      error: "Verification server error.",
-      details: error.message
+      error: "Verification server error."
     }, 500);
   }
 }
@@ -185,6 +200,20 @@ function expectedAmountFor(pending, registration) {
   }
 
   return PRICE_PER_ITEM;
+}
+
+function normalizeMobileNumber(value) {
+  let digits = String(value || "").replace(/\D/g, "");
+
+  if (digits.length === 12 && digits.startsWith("91")) {
+    digits = digits.slice(2);
+  }
+
+  if (digits.length === 11 && digits.startsWith("0")) {
+    digits = digits.slice(1);
+  }
+
+  return /^[6-9]\d{9}$/.test(digits) ? digits : "";
 }
 
 async function fetchRazorpayPayment(env, paymentId) {
@@ -354,6 +383,7 @@ function jsonResponse(data, status = 200) {
 function corsHeaders() {
   return {
     "Content-Type": "application/json",
+    "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"

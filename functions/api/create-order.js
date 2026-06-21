@@ -22,6 +22,15 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
+    const mobileNumber = normalizeMobileNumber(body.contact);
+    if (!mobileNumber) {
+      return jsonResponse({
+        success: false,
+        error: "Please enter a valid 10-digit mobile number."
+      }, 400);
+    }
+    body.contact = mobileNumber;
+
     const missing = requiredEnv(env);
     if (missing.length > 0) {
       return jsonResponse({
@@ -81,8 +90,7 @@ export async function onRequestPost(context) {
     if (!orderRes.ok) {
       return jsonResponse({
         success: false,
-        error: "Failed to create Razorpay order.",
-        details: order
+        error: "Failed to create Razorpay order."
       }, 500);
     }
 
@@ -113,8 +121,7 @@ export async function onRequestPost(context) {
         success: false,
         error: "Razorpay order created, but pending registration tracking failed.",
         order_id: order.id,
-        registration_id: registrationId,
-        details: insertText
+        registration_id: registrationId
       }, 500);
     }
 
@@ -133,8 +140,7 @@ export async function onRequestPost(context) {
   } catch (error) {
     return jsonResponse({
       success: false,
-      error: "Server error while creating order.",
-      details: error.message
+      error: "Server error while creating order."
     }, 500);
   }
 }
@@ -237,6 +243,20 @@ function normalizeCartItems(body) {
   return items;
 }
 
+function normalizeMobileNumber(value) {
+  let digits = String(value || "").replace(/\D/g, "");
+
+  if (digits.length === 12 && digits.startsWith("91")) {
+    digits = digits.slice(2);
+  }
+
+  if (digits.length === 11 && digits.startsWith("0")) {
+    digits = digits.slice(1);
+  }
+
+  return /^[6-9]\d{9}$/.test(digits) ? digits : "";
+}
+
 function requiredEnv(env) {
   const missing = [];
   if (!env.RAZORPAY_KEY_ID) missing.push("RAZORPAY_KEY_ID");
@@ -267,6 +287,7 @@ function jsonResponse(data, status = 200) {
 function corsHeaders() {
   return {
     "Content-Type": "application/json",
+    "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"

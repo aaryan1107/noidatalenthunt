@@ -1,0 +1,9 @@
+node_modules/
+.git/
+registrations/
+PSL Workbook/
+private/
+supabase/
+*.csv
+.wrangler/
+*.log
