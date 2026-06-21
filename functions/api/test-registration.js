@@ -90,3 +90,8 @@ function isAdminRequest(request, env) {
   const token = String(env.ADMIN_API_TOKEN || "").trim();
   return Boolean(token) && request.headers.get("x-admin-token") === token;
 }
+
+function isAdminRequest(request, env) {
+  const token = request.headers.get("x-admin-token");
+  return Boolean(env.ADMIN_TOKEN && token && token === env.ADMIN_TOKEN);
+}
