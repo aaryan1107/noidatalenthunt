@@ -71,6 +71,6 @@ function corsHeaders() {
 }
 
 function isAdminRequest(request, env) {
-  const token = String(env.ADMIN_API_TOKEN || "").trim();
+  const token = String(env.ADMIN_API_TOKEN || env.ADMIN_TOKEN || "").trim();
   return Boolean(token) && request.headers.get("x-admin-token") === token;
 }
