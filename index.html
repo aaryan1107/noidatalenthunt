@@ -1314,6 +1314,387 @@ body {
   }
 }
 
+/* Mobile refinement pass */
+@media (max-width: 520px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 62px;
+    padding: 0.65rem 0.85rem;
+    align-items: center;
+    column-gap: 0.65rem;
+    box-shadow: 0 8px 26px rgba(13,31,20,0.08);
+  }
+
+  .nav-left {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .nav-right {
+    display: none;
+    min-width: 0;
+    gap: 0;
+  }
+
+  .nav-brand {
+    font-size: 12.5px;
+    line-height: 1.05;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-sub {
+    font-size: 8.5px;
+    letter-spacing: 1.05px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-cta {
+    position: fixed;
+    top: 14px;
+    right: 0.85rem;
+    z-index: 240;
+    flex: 0 0 auto;
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    letter-spacing: 0.2px;
+    max-width: 110px;
+    white-space: nowrap;
+  }
+
+  section {
+    padding: 3rem 1rem;
+  }
+
+  .section-title {
+    font-size: clamp(38px, 12vw, 48px) !important;
+    line-height: 0.95;
+    letter-spacing: 0.6px;
+  }
+
+  .section-body {
+    max-width: 100%;
+    font-size: 15px;
+    line-height: 1.72;
+  }
+
+  .hero {
+    min-height: 100svh;
+    padding: 86px 1rem 2.75rem;
+    overflow: hidden;
+  }
+
+  .hero-inner {
+    gap: 1.35rem;
+    min-width: 0;
+  }
+
+  .hero-left {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 2.2px;
+    margin-bottom: 0.8rem;
+  }
+
+  .hero-title {
+    font-size: clamp(56px, 18vw, 74px) !important;
+    line-height: 0.88 !important;
+    letter-spacing: 0.8px !important;
+  }
+
+  .hero-title .outline {
+    -webkit-text-stroke-width: 1.35px;
+  }
+
+  .hero-tagline {
+    margin: 1rem 0 1.25rem;
+    max-width: 100%;
+    font-size: 15px;
+    line-height: 1.62;
+  }
+
+  .hero-proof {
+    width: 100%;
+    max-width: calc(100vw - 2rem);
+    min-width: 0;
+    gap: 0.55rem;
+    margin: 1rem 0 0;
+  }
+
+  .proof-chip {
+    display: block;
+    width: calc(100vw - 2.5rem);
+    max-width: 350px;
+    border-radius: 16px;
+    padding: 0.72rem 0.85rem;
+    font-size: 13px;
+    line-height: 1.42;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .proof-chip strong {
+    display: block;
+    margin: 0 0 0.15rem;
+  }
+
+  .hero-btns {
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .btn-hero-primary,
+  .btn-hero-sec,
+  .btn-amber-lg,
+  .btn-ghost {
+    min-height: 50px;
+    padding: 13px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .prize-card {
+    border-radius: 18px;
+    padding: 1.25rem 1rem;
+  }
+
+  .prize-num {
+    font-size: 66px !important;
+  }
+
+  .prize-facts {
+    gap: 0.65rem;
+  }
+
+  .prize-fact {
+    font-size: 13px;
+  }
+
+  .stats-grid {
+    gap: 1rem 0.75rem;
+  }
+
+  .stat-value {
+    font-size: clamp(38px, 13vw, 56px);
+  }
+
+  .cat-card {
+    border-radius: 12px;
+    padding: 1.15rem;
+  }
+
+  .cat-card-header {
+    margin-bottom: 1rem;
+  }
+
+  .cat-tags {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .cat-tag {
+    width: 100%;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 10px;
+  }
+
+  .psl-grid,
+  .finale-inner,
+  .who-grid {
+    gap: 2rem;
+  }
+
+  .insta-frame-wrap {
+    min-height: 440px;
+    border-radius: 14px;
+  }
+
+  .insta-frame {
+    height: 440px;
+  }
+
+  .age-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .age-card {
+    border-radius: 10px;
+    padding: 1rem 0.65rem;
+  }
+
+  .age-range {
+    font-size: 34px;
+  }
+
+  .age-label {
+    font-size: 9px;
+    letter-spacing: 1.4px;
+  }
+
+  .big-cta {
+    padding: 4rem 1rem;
+  }
+
+  .big-cta-title {
+    font-size: clamp(46px, 15vw, 62px);
+    line-height: 0.92;
+    letter-spacing: 1px;
+  }
+
+  .big-cta-sub {
+    font-size: 15px;
+    margin-bottom: 1.6rem;
+  }
+
+  .registration-studio .container {
+    padding: 0 0.85rem;
+  }
+
+  .reg-panel,
+  .reg-empty {
+    border-radius: 16px;
+  }
+
+  .reg-hero {
+    padding: 1.15rem;
+  }
+
+  .reg-back {
+    color: var(--green-light);
+    margin-bottom: 0.75rem;
+  }
+
+  .reg-badge {
+    max-width: 100%;
+    white-space: normal;
+    border-radius: 12px;
+    line-height: 1.35;
+    padding: 0.45rem 0.65rem;
+    font-size: 9.5px;
+    letter-spacing: 1px;
+  }
+
+  .reg-title {
+    font-size: clamp(42px, 13vw, 52px) !important;
+    line-height: 0.92;
+    letter-spacing: 0.8px;
+  }
+
+  .reg-intro {
+    font-size: 13.5px;
+    line-height: 1.62;
+  }
+
+  .reg-fee-pill {
+    border-radius: 12px;
+    padding: 0.8rem;
+  }
+
+  .reg-body {
+    padding: 0.85rem;
+  }
+
+  .info-card,
+  .reg-block {
+    border-radius: 12px;
+  }
+
+  .reg-block {
+    padding: 0.95rem;
+  }
+
+  .reg-block-title h4 {
+    font-size: 26px !important;
+  }
+
+  .field label {
+    font-size: 11px;
+    letter-spacing: 0.9px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  textarea {
+    min-height: 96px;
+  }
+
+  .choice {
+    min-height: 46px;
+    padding: 0.72rem;
+    align-items: flex-start;
+  }
+
+  .choice span {
+    line-height: 1.45;
+  }
+
+  .pay-summary {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .pay-chip {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  .cart-summary {
+    padding: 0.95rem;
+    border-radius: 14px;
+  }
+
+  .cart-total {
+    font-size: 18px;
+    line-height: 1.25;
+    padding: 0.85rem;
+  }
+
+  .whatsapp-help-btn {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .btn-pay {
+    min-height: 52px;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+
+  footer {
+    padding: 2.2rem 1rem;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1360,7 +1741,7 @@ body {
         Because every child in Noida deserves a stage.
       </p>
       <div class="hero-proof">
-        <div class="proof-chip"><strong>Anyone can participate</strong> students, academies, societies and independent participants are all welcome.</div>
+        <div class="proof-chip"><strong>Anyone can participate.</strong> Students, academies, societies and independent participants are all welcome.</div>
         <div class="proof-chip"><strong>Slots closing soon !</strong></div>
       </div>
       <div class="hero-btns">
