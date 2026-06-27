@@ -1,5 +1,3 @@
-const PRICE_PER_ITEM = 70000; // Rs. 700 in paise
-
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -10,8 +8,7 @@ export async function onRequestPost(context) {
       registration_id,
       razorpay_order_id,
       razorpay_payment_id,
-      razorpay_signature,
-      registration
+      razorpay_signature
     } = body;
 
     if (
@@ -56,12 +53,31 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    const existing = await findExistingRegistration(env, registration_id, razorpay_order_id, razorpay_payment_id);
-    const pending = existing.find(row => row.id === registration_id) || existing[0] || null;
-    const fallbackRegistration = registration || {};
-    const expectedAmount = expectedAmountFor(pending, fallbackRegistration);
-    const expectedCurrency = (pending?.currency || fallbackRegistration.currency || "INR").toUpperCase();
-    const mobileNumber = normalizeMobileNumber(pending?.contact || fallbackRegistration.contact);
+    const pending = await findPendingRegistration(env, registration_id, razorpay_order_id);
+    if (!pending) {
+      return jsonResponse({
+        success: false,
+        error: "No pending registration found for this Razorpay order."
+      }, 400);
+    }
+
+    if (pending.razorpay_payment_id && pending.razorpay_payment_id !== razorpay_payment_id) {
+      return jsonResponse({
+        success: false,
+        error: "Registration is already linked to a different Razorpay payment."
+      }, 409);
+    }
+
+    const expectedAmount = Number(pending.amount);
+    const expectedCurrency = String(pending.currency || "INR").toUpperCase();
+    const mobileNumber = normalizeMobileNumber(pending.contact);
+
+    if (!Number.isFinite(expectedAmount) || expectedAmount <= 0) {
+      return jsonResponse({
+        success: false,
+        error: "Pending registration has an invalid expected amount."
+      }, 400);
+    }
 
     if (!mobileNumber) {
       return jsonResponse({
@@ -70,13 +86,10 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    fallbackRegistration.contact = mobileNumber;
     if (pending?.form_data) {
       pending.form_data.contact = mobileNumber;
     }
-    if (pending) {
-      pending.contact = mobileNumber;
-    }
+    pending.contact = mobileNumber;
 
     if (payment.amount !== expectedAmount || payment.currency !== expectedCurrency) {
       return jsonResponse({
@@ -110,17 +123,15 @@ export async function onRequestPost(context) {
     }
 
     const row = buildPaidRegistrationRow({
-      registration_id: pending?.id || registration_id,
+      registration_id: pending.id,
       razorpay_order_id,
       razorpay_payment_id,
-      registration: pending?.form_data || fallbackRegistration,
+      registration: pending.form_data || {},
       payment,
       pending
     });
 
-    const saved = pending
-      ? await updateRegistration(env, pending.id, row)
-      : await insertRegistration(env, row);
+    const saved = await updateRegistration(env, pending.id, row);
 
     return jsonResponse({
       success: true,
@@ -182,26 +193,6 @@ function buildPaidRegistrationRow({ registration_id, razorpay_order_id, razorpay
   };
 }
 
-function expectedAmountFor(pending, registration) {
-  if (Number.isFinite(Number(pending?.amount)) && Number(pending.amount) > 0) {
-    return Number(pending.amount);
-  }
-
-  if (Number.isFinite(Number(registration?.amount)) && Number(registration.amount) > 0) {
-    return Number(registration.amount);
-  }
-
-  if (Number.isFinite(Number(registration?.cart_count)) && Number(registration.cart_count) > 0) {
-    return Number(registration.cart_count) * PRICE_PER_ITEM;
-  }
-
-  if (Array.isArray(registration?.cart_items) && registration.cart_items.length > 0) {
-    return registration.cart_items.length * PRICE_PER_ITEM;
-  }
-
-  return PRICE_PER_ITEM;
-}
-
 function normalizeMobileNumber(value) {
   let digits = String(value || "").replace(/\D/g, "");
 
@@ -259,8 +250,8 @@ async function captureRazorpayPayment(env, paymentId, amount) {
   return data;
 }
 
-async function findExistingRegistration(env, registrationId, orderId, paymentId) {
-  const url = supabaseRestUrl(env, `registrations?select=*&or=(id.eq.${encodeURIComponent(registrationId)},razorpay_order_id.eq.${encodeURIComponent(orderId)},razorpay_payment_id.eq.${encodeURIComponent(paymentId)})`);
+async function findPendingRegistration(env, registrationId, orderId) {
+  const url = supabaseRestUrl(env, `registrations?select=*&id=eq.${encodeURIComponent(registrationId)}&razorpay_order_id=eq.${encodeURIComponent(orderId)}&limit=1`);
 
   const res = await fetch(url, {
     method: "GET",
@@ -272,10 +263,11 @@ async function findExistingRegistration(env, registrationId, orderId, paymentId)
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Supabase registration lookup failed: ${text}`);
+    throw new Error(`Supabase pending registration lookup failed: ${text}`);
   }
 
-  return await res.json();
+  const rows = await res.json();
+  return rows[0] || null;
 }
 
 async function updateRegistration(env, id, row) {
@@ -294,27 +286,6 @@ async function updateRegistration(env, id, row) {
 
   if (!res.ok) {
     throw new Error(`Supabase update failed: ${text}`);
-  }
-
-  return JSON.parse(text)[0];
-}
-
-async function insertRegistration(env, row) {
-  const res = await fetch(supabaseRestUrl(env, "registrations"), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
-      "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-      "Prefer": "return=representation"
-    },
-    body: JSON.stringify(row)
-  });
-
-  const text = await res.text();
-
-  if (!res.ok) {
-    throw new Error(`Supabase insert failed: ${text}`);
   }
 
   return JSON.parse(text)[0];

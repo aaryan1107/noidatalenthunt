@@ -60,7 +60,31 @@ export async function onRequestPost(context) {
       });
     }
 
-    const rows = await updateRegistrationIfExists(env, razorpayOrderId, patch);
+    const pending = await findRegistrationByOrderId(env, razorpayOrderId);
+    if (!pending) {
+      return jsonResponse({
+        success: true,
+        handled: true,
+        matched: false,
+        event: eventType,
+        razorpay_order_id: razorpayOrderId,
+        message: "Webhook processed, but no matching registration row was found."
+      });
+    }
+
+    const guard = validatePaymentPatch(patch, pending);
+    if (!guard.valid) {
+      return jsonResponse({
+        success: false,
+        error: guard.error,
+        expected_amount: guard.expected_amount,
+        actual_amount: guard.actual_amount,
+        expected_currency: guard.expected_currency,
+        actual_currency: guard.actual_currency
+      }, 400);
+    }
+
+    const rows = await updateRegistration(env, pending.id, patch);
 
     return jsonResponse({
       success: true,
@@ -68,9 +92,7 @@ export async function onRequestPost(context) {
       matched: rows.length > 0,
       event: eventType,
       razorpay_order_id: razorpayOrderId,
-      message: rows.length > 0
-        ? "Webhook processed and registration updated."
-        : "Webhook processed, but no matching registration row was found."
+      message: "Webhook processed and registration updated."
     });
 
   } catch (error) {
@@ -127,8 +149,55 @@ function cleanPatch(data) {
   return cleanData;
 }
 
-async function updateRegistrationIfExists(env, razorpayOrderId, data) {
-  const res = await fetch(supabaseRestUrl(env, `registrations?razorpay_order_id=eq.${encodeURIComponent(razorpayOrderId)}`), {
+function validatePaymentPatch(patch, pending) {
+  const hasPaymentAmount = patch.amount !== undefined || patch.currency !== undefined;
+  if (!hasPaymentAmount) return { valid: true };
+
+  const expectedAmount = Number(pending.amount);
+  const actualAmount = Number(patch.amount);
+  const expectedCurrency = String(pending.currency || "INR").toUpperCase();
+  const actualCurrency = String(patch.currency || "").toUpperCase();
+
+  if (
+    !Number.isFinite(expectedAmount) ||
+    !Number.isFinite(actualAmount) ||
+    actualAmount !== expectedAmount ||
+    actualCurrency !== expectedCurrency
+  ) {
+    return {
+      valid: false,
+      error: "Webhook payment amount or currency does not match pending registration.",
+      expected_amount: expectedAmount,
+      actual_amount: actualAmount,
+      expected_currency: expectedCurrency,
+      actual_currency: actualCurrency
+    };
+  }
+
+  return { valid: true };
+}
+
+async function findRegistrationByOrderId(env, razorpayOrderId) {
+  const res = await fetch(supabaseRestUrl(env, `registrations?select=*&razorpay_order_id=eq.${encodeURIComponent(razorpayOrderId)}&limit=1`), {
+    method: "GET",
+    headers: {
+      "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
+      "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`
+    }
+  });
+
+  const text = await res.text();
+
+  if (!res.ok) {
+    throw new Error(`Supabase webhook lookup failed: ${text}`);
+  }
+
+  const rows = text ? JSON.parse(text) : [];
+  return rows[0] || null;
+}
+
+async function updateRegistration(env, registrationId, data) {
+  const res = await fetch(supabaseRestUrl(env, `registrations?id=eq.${encodeURIComponent(registrationId)}`), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

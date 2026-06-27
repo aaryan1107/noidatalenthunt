@@ -2377,6 +2377,14 @@ function buildCartItems(slug, data){
     return [makeCartItem(cfg, `${group} — ${events.join(', ')}`, 0)];
   }
 
+  if(slug === 'dance'){
+    return buildParticipantCountItems(cfg, data, 'participation_type', 'Group', 'number_of_participants');
+  }
+
+  if(slug === 'business-plan'){
+    return buildParticipantCountItems(cfg, data, 'participation_type', 'Team', 'number_of_team_members');
+  }
+
   const cartFields = CART_FIELDS_BY_SLUG[slug];
   if(cartFields){
     const selected = cartFields.flatMap(field => normalizeToArray(data[field]));
@@ -2384,6 +2392,20 @@ function buildCartItems(slug, data){
   }
 
   return [makeCartItem(cfg, `${cfg.title} Registration`, 0)];
+}
+
+function buildParticipantCountItems(cfg, data, typeField, groupedValue, countField){
+  const participationType = String(data[typeField] || '').trim().toLowerCase();
+  if(participationType !== groupedValue.toLowerCase()){
+    return [makeCartItem(cfg, `${cfg.title} Registration`, 0)];
+  }
+
+  const count = Number(data[countField]);
+  if(!Number.isInteger(count) || count < 2 || count > 100) return [];
+
+  return Array.from({length:count}, (_, index) =>
+    makeCartItem(cfg, `${cfg.title} ${groupedValue} Participant ${index + 1}`, index)
+  );
 }
 
 function updatePaymentSummary(form){
@@ -2534,6 +2556,10 @@ function bindRegistrationForm(){
       });
       const order = await orderRes.json();
       if(!orderRes.ok || !order.success) throw new Error(formatApiError(order, 'Could not create Razorpay order'));
+
+      if(typeof window.Razorpay !== 'function'){
+        throw new Error('Payment checkout could not load. Please refresh once, check your internet connection, and try again.');
+      }
 
       const checkout = new Razorpay({
         key: order.razorpay_key_id || RAZORPAY_KEY_ID,
