@@ -27,13 +27,27 @@ export async function onRequestGet(context) {
 
     const checkedColumns = [
       "id",
+      "participant_name",
+      "dob",
+      "age",
+      "school",
+      "contact",
+      "email",
+      "id_number",
+      "age_group",
+      "gender",
+      "arena",
+      "event",
+      "category_slug",
+      "selected_options",
+      "form_data",
       "amount",
       "currency",
       "payment_status",
       "razorpay_order_id",
       "razorpay_payment_id",
-      "form_data",
-      "selected_options"
+      "payment_method",
+      "created_at"
     ];
 
     const res = await fetch(supabaseRestUrl(env, `registrations?select=${checkedColumns.join(",")}&limit=1`), {
@@ -49,7 +63,8 @@ export async function onRequestGet(context) {
     if (!res.ok) {
       return jsonResponse({
         success: false,
-        error: "Supabase connection failed."
+        error: "Supabase registration schema check failed.",
+        details: text
       }, 500);
     }
 

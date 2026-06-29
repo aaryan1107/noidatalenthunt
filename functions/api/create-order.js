@@ -1,4 +1,28 @@
 const PRICE_PER_ITEM = 70000; // Rs. 700 in paise
+const TRACKING_COLUMNS = [
+  "id",
+  "participant_name",
+  "dob",
+  "age",
+  "school",
+  "contact",
+  "email",
+  "id_number",
+  "age_group",
+  "gender",
+  "arena",
+  "event",
+  "category_slug",
+  "selected_options",
+  "form_data",
+  "amount",
+  "currency",
+  "razorpay_order_id",
+  "razorpay_payment_id",
+  "payment_status",
+  "payment_method",
+  "created_at"
+];
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -40,15 +64,7 @@ export async function onRequestPost(context) {
       }, 500);
     }
 
-    const cartResult = buildTrustedCartItems(body);
-    if (cartResult.error) {
-      return jsonResponse({
-        success: false,
-        error: cartResult.error
-      }, cartResult.status || 400);
-    }
-
-    const cartItems = cartResult.items;
+    const cartItems = normalizeCartItems(body);
 
     if (cartItems.length === 0) {
       return jsonResponse({
@@ -57,9 +73,26 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
+    if (eventName.toLowerCase().includes("table tennis") && cartItems.length > 2) {
+      return jsonResponse({
+        success: false,
+        error: "Table Tennis allows a maximum of 2 categories only."
+      }, 400);
+    }
+
     const amount = cartItems.length * PRICE_PER_ITEM;
     const currency = "INR";
     const registrationId = crypto.randomUUID();
+
+    const trackingReady = await assertRegistrationTrackingReady(env);
+    if (!trackingReady.ok) {
+      return jsonResponse({
+        success: false,
+        error: "Registration tracking is temporarily unavailable. Please try again shortly or contact the organiser.",
+        details: trackingReady.details,
+        supabase_status: trackingReady.status
+      }, 500);
+    }
 
     const razorpayKeyId = String(env.RAZORPAY_KEY_ID || "").trim();
     const razorpayKeySecret = String(env.RAZORPAY_KEY_SECRET || "").trim();
@@ -121,6 +154,8 @@ export async function onRequestPost(context) {
       return jsonResponse({
         success: false,
         error: "Razorpay order created, but pending registration tracking failed.",
+        details: insertText,
+        supabase_status: insertRes.status,
         order_id: order.id,
         registration_id: registrationId
       }, 500);
@@ -194,137 +229,72 @@ function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, 
   };
 }
 
-function buildTrustedCartItems(body) {
-  const slug = slugify(body.event || "");
-  const eventName = String(body.event || "Registration").trim() || "Registration";
-  const oneItem = (label = `${eventName} Registration`) => ok([makeCartItem(eventName, label, 0)]);
-
-  if (slug === "badminton") {
-    return fromArrayFields(body, eventName, ["badminton_events", "badmintonEvents"], {
-      required: true,
-      emptyError: "Please select at least one badminton event."
-    });
-  }
-
-  if (slug === "table-tennis") {
-    return fromArrayFields(body, eventName, ["tt_categories", "ttCategories", "table_tennis_categories", "tableTennisCategories"], {
-      required: true,
-      max: 2,
-      emptyError: "Please select at least one table tennis category.",
-      maxError: "Table Tennis allows a maximum of 2 categories only."
-    });
-  }
-
-  if (slug === "chess") {
-    return fromArrayFields(body, eventName, ["chess_age_categories", "chessAgeCategories"], {
-      required: true,
-      max: 3,
-      emptyError: "Please select at least one chess age category.",
-      maxError: "Chess allows a maximum of 3 age categories only."
-    });
-  }
-
-  if (slug === "shooting") {
-    const selected = valuesFromFields(body, ["shooting_events", "shootingEvents"]);
-    const entryType = String(body.shooting_entry_type || "").trim();
-    const teamEvents = entryType === "Team Entry"
-      ? valuesFromFields(body, ["team_entry_events", "shooting_team_events", "shootingTeamEvents"])
-      : [];
-
-    if (entryType === "Team Entry" && teamEvents.length === 0) {
-      return fail("Please select at least one shooting team entry event.");
+async function assertRegistrationTrackingReady(env) {
+  const res = await fetch(supabaseRestUrl(env, `registrations?select=${TRACKING_COLUMNS.join(",")}&limit=1`), {
+    method: "GET",
+    headers: {
+      "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
+      "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`
     }
+  });
 
-    const allSelected = [...selected, ...teamEvents];
-    if (allSelected.length === 0) {
-      return fail("Please select at least one shooting event.");
-    }
+  const text = await res.text();
 
-    return ok(allSelected.map((label, index) => makeCartItem(eventName, label, index)));
-  }
-
-  if (slug === "swimming") {
-    const group = String(body.swimming_group || "").trim();
-    const events = valuesFromFields(body, ["swimming_events", "swimmingEvents"]);
-
-    if (!group) return fail("Please select a swimming age group.");
-    if (events.length === 0) return fail("Please select at least one swimming event.");
-    if (events.length > 3) return fail("Swimming allows a maximum of 3 events only.");
-
-    return oneItem(`${group} - ${events.join(", ")}`);
-  }
-
-  if (slug === "dance") {
-    return participantCountItems(body, eventName, "number_of_participants", "Group", "participation_type");
-  }
-
-  if (slug === "business-plan") {
-    return participantCountItems(body, eventName, "number_of_team_members", "Team", "participation_type");
-  }
-
-  return oneItem();
-}
-
-function participantCountItems(body, eventName, countField, groupedValue, typeField) {
-  const participationType = String(body[typeField] || "").trim();
-  const isGrouped = participationType.toLowerCase() === groupedValue.toLowerCase();
-
-  if (!isGrouped) {
-    return ok([makeCartItem(eventName, `${eventName} Registration`, 0)]);
-  }
-
-  const count = Number(body[countField]);
-  if (!Number.isInteger(count) || count < 2 || count > 100) {
-    return fail(`Please enter a valid ${groupedValue.toLowerCase()} participant count.`);
-  }
-
-  const items = Array.from({ length: count }, (_, index) =>
-    makeCartItem(eventName, `${eventName} ${groupedValue} Participant ${index + 1}`, index)
-  );
-
-  return ok(items);
-}
-
-function fromArrayFields(body, eventName, fields, options = {}) {
-  const values = valuesFromFields(body, fields);
-
-  if (options.required && values.length === 0) {
-    return fail(options.emptyError || "Please select at least one option.");
-  }
-
-  if (options.max && values.length > options.max) {
-    return fail(options.maxError || `Please select at most ${options.max} options.`);
-  }
-
-  return ok(values.map((label, index) => makeCartItem(eventName, label, index)));
-}
-
-function valuesFromFields(body, fields) {
-  return fields.flatMap(field => normalizeToArray(body[field])).map(value => String(value).trim()).filter(Boolean);
-}
-
-function normalizeToArray(value) {
-  if (Array.isArray(value)) return value.filter(value => value !== null && value !== undefined && value !== "");
-  if (value) return [value];
-  return [];
-}
-
-function makeCartItem(eventName, label, index) {
   return {
-    item_no: index + 1,
-    event: eventName,
-    label,
-    amount: PRICE_PER_ITEM,
-    currency: "INR"
+    ok: res.ok,
+    status: res.status,
+    details: res.ok ? "" : text
   };
 }
 
-function ok(items) {
-  return { items };
-}
+function normalizeCartItems(body) {
+  if (Array.isArray(body.cart_items) && body.cart_items.length > 0) {
+    return body.cart_items
+      .map(item => {
+        if (typeof item === "string") {
+          return { label: item, amount: PRICE_PER_ITEM };
+        }
 
-function fail(error, status = 400) {
-  return { items: [], error, status };
+        return {
+          label: item.label || item.name || item.event || item.category || "Selected Event",
+          amount: PRICE_PER_ITEM
+        };
+      })
+      .filter(item => item.label);
+  }
+
+  const possibleArrayFields = [
+    "badminton_events",
+    "badmintonEvents",
+    "shooting_events",
+    "shootingEvents",
+    "team_entry_events",
+    "shooting_team_events",
+    "shootingTeamEvents",
+    "table_tennis_categories",
+    "tableTennisCategories",
+    "tt_categories",
+    "ttCategories",
+    "chess_age_categories",
+    "chessAgeCategories",
+    "selected_options",
+    "selectedOptions"
+  ];
+
+  const items = [];
+
+  for (const field of possibleArrayFields) {
+    if (Array.isArray(body[field])) {
+      body[field].forEach(value => {
+        items.push({
+          label: String(value),
+          amount: PRICE_PER_ITEM
+        });
+      });
+    }
+  }
+
+  return items;
 }
 
 function normalizeMobileNumber(value) {
