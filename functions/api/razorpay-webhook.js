@@ -72,6 +72,20 @@ export async function onRequestPost(context) {
       });
     }
 
+    if (
+      (pending.payment_status === "PAID_CONFIRMED" || pending.payment_status === "PAID_CONFIRMED_MANUAL") &&
+      patch.payment_status !== "PAID_CONFIRMED"
+    ) {
+      return jsonResponse({
+        success: true,
+        handled: true,
+        matched: true,
+        event: eventType,
+        razorpay_order_id: razorpayOrderId,
+        message: "Webhook ignored because registration is already confirmed."
+      });
+    }
+
     const guard = validatePaymentPatch(patch, pending);
     if (!guard.valid) {
       return jsonResponse({

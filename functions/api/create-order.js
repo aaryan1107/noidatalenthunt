@@ -110,11 +110,11 @@ export async function onRequestPost(context) {
         receipt: registrationId,
         notes: {
           registration_id: registrationId,
-          participant_name: participantName,
-          arena,
-          event: eventName,
+          participant_name: razorpayNoteValue(participantName),
+          arena: razorpayNoteValue(arena),
+          event: razorpayNoteValue(eventName),
           cart_count: String(cartItems.length),
-          cart_items: cartItems.map(item => item.label).join(" | ")
+          cart_items: razorpayNoteValue(cartItems.map(item => item.label).join(" | "))
         }
       })
     });
@@ -309,6 +309,10 @@ function normalizeMobileNumber(value) {
   }
 
   return /^[6-9]\d{9}$/.test(digits) ? digits : "";
+}
+
+function razorpayNoteValue(value) {
+  return String(value || "").slice(0, 256);
 }
 
 function requiredEnv(env) {
