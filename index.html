@@ -1976,7 +1976,7 @@ body {
         <div class="cat-note">Sports are part of Prometheus Sports League (PSL), bringing six focused sports categories under the Noida Talent Hunt banner.</div>
         <div class="cat-tags">
           <a class="cat-tag option-btn" href="#register-badminton" data-category="sports" data-option="badminton" aria-label="Open Badminton registration form">Badminton</a>
-          <a class="cat-tag option-btn" href="#register-table-tennis" data-category="sports" data-option="table-tennis" aria-label="Open Table Tennis registration form">Table Tennis</a>
+          <a class="cat-tag option-btn closed" href="#register-table-tennis" data-category="sports" data-option="table-tennis" aria-label="Table Tennis registrations closed">Table Tennis · Closed</a>
           <a class="cat-tag option-btn" href="#register-chess" data-category="sports" data-option="chess" aria-label="Open Chess registration form">Chess</a>
           <a class="cat-tag option-btn closed" href="#register-swimming" data-category="sports" data-option="swimming" aria-label="Swimming registrations closed">Swimming · Closed</a>
           <a class="cat-tag option-btn" href="#register-gymnastics" data-category="sports" data-option="gymnastics" aria-label="Open Gymnastics registration form">Gymnastics</a>
@@ -2159,6 +2159,13 @@ Object.assign(REGISTRATION_CONFIG.swimming, {
   intro: 'Swimming registrations are now closed. Existing confirmed participants will receive reporting details from the organising team.',
   lastDay: 'Registrations Closed'
 });
+Object.assign(REGISTRATION_CONFIG['table-tennis'], {
+  closed: true,
+  closedLabel: 'Registrations Closed',
+  closedMessage: 'Table Tennis registrations are now closed. No new Table Tennis responses or payments are being accepted.',
+  intro: 'Table Tennis registrations are now closed. Existing confirmed participants will receive reporting details from the organising team.',
+  lastDay: 'Registrations Closed'
+});
 REGISTRATION_CONFIG.gymnastics.lastDay = '7th July 2026';
 const REGISTRATION_API_BASE = "/api"; // Production storage + payment verification backend, example: https://api.noidatalenthunt.com
 const RAZORPAY_KEY_ID = ""; // Production Razorpay public key only. Never put secret key in this HTML.
@@ -2293,12 +2300,12 @@ function renderRegistration(slug){
         <div class="info-card"><small>Status</small><strong>Registrations Closed</strong></div>
       </div>
       <div class="reg-block soft">
-        <div class="reg-block-title"><h4>Swimming Registrations Closed</h4><span class="micro">No new entries</span></div>
+        <div class="reg-block-title"><h4>${escapeHtml(cfg.title)} Registrations Closed</h4><span class="micro">No new entries</span></div>
         <p class="hint">${escapeHtml(closedMessage)}</p>
         <ol class="rule-list">
-          <li>No new Swimming form responses are being accepted.</li>
-          <li>The Pay & Register flow has been disabled for Swimming.</li>
-          <li>Existing confirmed Swimming entries remain valid and will receive organiser updates separately.</li>
+          <li>No new ${escapeHtml(cfg.title)} form responses are being accepted.</li>
+          <li>The Pay & Register flow has been disabled for ${escapeHtml(cfg.title)}.</li>
+          <li>Existing confirmed ${escapeHtml(cfg.title)} entries remain valid and will receive organiser updates separately.</li>
           ${cfg.whatsapp ? `<li>Tournament updates via WhatsApp group: <a href="${escapeHtml(cfg.whatsapp)}" target="_blank" rel="noopener noreferrer">Join / open link</a></li>` : ''}
         </ol>
       </div>
