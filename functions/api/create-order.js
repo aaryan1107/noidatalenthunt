@@ -6,6 +6,11 @@ const SHOOTING_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T17:30:00+05:30");
 const SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL = "5:30 PM IST";
 const OPEN_EVENTS_LABEL = "Badminton, Gymnastics and Chess registrations remain open.";
 const REGISTRATION_CUTOFF_OPEN_LABEL = `${OPEN_EVENTS_LABEL} Shooting registrations close at ${SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL}.`;
+const CHESS_CLOSED_DAY_ONE_OPTIONS = new Set([
+  normalizeSelectionLabel("Under-11 (Born on or after 01/01/2015) - Day 1"),
+  normalizeSelectionLabel("Under-13 (Born on or after 01/01/2013) - Day 1"),
+  normalizeSelectionLabel("Under-15 (Born on or after 01/01/2011) - Day 1")
+]);
 const TRACKING_COLUMNS = [
   "id",
   "participant_name",
@@ -93,6 +98,19 @@ export async function onRequestPost(context) {
         success: false,
         error: "Table Tennis allows a maximum of 2 categories only."
       }, 400);
+    }
+
+    if (slugify(eventName) === "chess") {
+      const closedDayOneItem = cartItems.find(item =>
+        CHESS_CLOSED_DAY_ONE_OPTIONS.has(normalizeSelectionLabel(item.label))
+      );
+
+      if (closedDayOneItem) {
+        return jsonResponse({
+          success: false,
+          error: "Chess Day 1 registrations are now closed. Please select only the available Day 2 or Day 3 chess categories."
+        }, 403);
+      }
     }
 
     const amount = cartItems.length * PRICE_PER_ITEM;
@@ -371,6 +389,13 @@ function slugify(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+function normalizeSelectionLabel(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 }
 
 export async function onRequestOptions() {
