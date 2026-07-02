@@ -2171,7 +2171,10 @@ const REGISTRATION_CUTOFF_AT = Date.parse('2026-07-02T12:00:00+05:30');
 const REGISTRATION_CUTOFF_EXEMPT = new Set(['badminton', 'gymnastics', 'chess', 'shooting']);
 const REGISTRATION_CUTOFF_LABEL = 'Registrations Closed';
 const REGISTRATION_CUTOFF_TIME_LABEL = '12:00 PM IST';
-const REGISTRATION_CUTOFF_OPEN_LABEL = 'Badminton, Gymnastics, Chess and Shooting registrations remain open.';
+const SHOOTING_REGISTRATION_CUTOFF_AT = Date.parse('2026-07-02T17:30:00+05:30');
+const SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL = '5:30 PM IST';
+const OPEN_EVENTS_LABEL = 'Badminton, Gymnastics and Chess registrations remain open.';
+const REGISTRATION_CUTOFF_OPEN_LABEL = `${OPEN_EVENTS_LABEL} Shooting registrations close at ${SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL}.`;
 const REGISTRATION_API_BASE = "/api"; // Production storage + payment verification backend, example: https://api.noidatalenthunt.com
 const RAZORPAY_KEY_ID = ""; // Production Razorpay public key only. Never put secret key in this HTML.
 const DIRECT_RAZORPAY_LINK_FALLBACK = false; // While backend is pending, the single Pay & Register button opens the event Razorpay link.
@@ -2188,13 +2191,32 @@ const arenaGroups = {
 };
 
 function applyTimedRegistrationClosure(now = Date.now()){
-  if(now < REGISTRATION_CUTOFF_AT) return false;
-
   let changed = false;
+
+  if(now >= SHOOTING_REGISTRATION_CUTOFF_AT){
+    const cfg = REGISTRATION_CONFIG.shooting;
+    const closedMessage = `${cfg.title} registrations are now closed. No new ${cfg.title} responses or payments are being accepted after ${SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL}. ${OPEN_EVENTS_LABEL}`;
+
+    if(!cfg.closed || cfg.closedMessage !== closedMessage){
+      changed = true;
+    }
+
+    Object.assign(cfg, {
+      closed: true,
+      closedLabel: REGISTRATION_CUTOFF_LABEL,
+      closedMessage,
+      intro: `${cfg.title} registrations are now closed. Existing confirmed participants will receive reporting details from the organising team.`,
+      lastDay: REGISTRATION_CUTOFF_LABEL
+    });
+  }
+
+  if(now < REGISTRATION_CUTOFF_AT) return changed;
+
   Object.entries(REGISTRATION_CONFIG).forEach(([slug, cfg]) => {
     if(REGISTRATION_CUTOFF_EXEMPT.has(slug)) return;
 
-    const closedMessage = `${cfg.title} registrations are now closed. No new ${cfg.title} responses or payments are being accepted after ${REGISTRATION_CUTOFF_TIME_LABEL}. ${REGISTRATION_CUTOFF_OPEN_LABEL}`;
+    const openLabel = now >= SHOOTING_REGISTRATION_CUTOFF_AT ? OPEN_EVENTS_LABEL : REGISTRATION_CUTOFF_OPEN_LABEL;
+    const closedMessage = `${cfg.title} registrations are now closed. No new ${cfg.title} responses or payments are being accepted after ${REGISTRATION_CUTOFF_TIME_LABEL}. ${openLabel}`;
 
     if(!cfg.closed || cfg.closedMessage !== closedMessage){
       changed = true;
@@ -2846,6 +2868,10 @@ enforceTimedRegistrationClosure();
 const cutoffDelay = REGISTRATION_CUTOFF_AT - Date.now();
 if(cutoffDelay > 0){
   setTimeout(enforceTimedRegistrationClosure, cutoffDelay + 50);
+}
+const shootingCutoffDelay = SHOOTING_REGISTRATION_CUTOFF_AT - Date.now();
+if(shootingCutoffDelay > 0){
+  setTimeout(enforceTimedRegistrationClosure, shootingCutoffDelay + 50);
 }
 setInterval(enforceTimedRegistrationClosure, 15000);
 

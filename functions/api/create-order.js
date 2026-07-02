@@ -2,7 +2,10 @@ const PRICE_PER_ITEM = 70000; // Rs. 700 in paise
 const REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T12:00:00+05:30");
 const REGISTRATION_CUTOFF_EXEMPT_EVENTS = new Set(["badminton", "gymnastics", "chess", "shooting"]);
 const REGISTRATION_CUTOFF_TIME_LABEL = "12:00 PM IST";
-const REGISTRATION_CUTOFF_OPEN_LABEL = "Badminton, Gymnastics, Chess and Shooting registrations remain open.";
+const SHOOTING_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T17:30:00+05:30");
+const SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL = "5:30 PM IST";
+const OPEN_EVENTS_LABEL = "Badminton, Gymnastics and Chess registrations remain open.";
+const REGISTRATION_CUTOFF_OPEN_LABEL = `${OPEN_EVENTS_LABEL} Shooting registrations close at ${SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL}.`;
 const TRACKING_COLUMNS = [
   "id",
   "participant_name",
@@ -50,10 +53,11 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    if (isRegistrationClosedByCutoff(eventName)) {
+    const closure = getRegistrationClosure(eventName);
+    if (closure.closed) {
       return jsonResponse({
         success: false,
-        error: `${eventName} registrations are now closed. No new ${eventName} responses or payments are being accepted after ${REGISTRATION_CUTOFF_TIME_LABEL}. ${REGISTRATION_CUTOFF_OPEN_LABEL}`
+        error: `${eventName} registrations are now closed. No new ${eventName} responses or payments are being accepted after ${closure.timeLabel}. ${closure.openLabel}`
       }, 403);
     }
 
@@ -335,11 +339,31 @@ function requiredEnv(env) {
   return missing;
 }
 
-function isRegistrationClosedByCutoff(eventName, now = Date.now()) {
-  if (now < REGISTRATION_CUTOFF_AT) return false;
-
+function getRegistrationClosure(eventName, now = Date.now()) {
   const slug = slugify(eventName);
-  return !REGISTRATION_CUTOFF_EXEMPT_EVENTS.has(slug);
+
+  if (slug === "shooting" && now >= SHOOTING_REGISTRATION_CUTOFF_AT) {
+    return {
+      closed: true,
+      timeLabel: SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL,
+      openLabel: OPEN_EVENTS_LABEL
+    };
+  }
+
+  if (now >= REGISTRATION_CUTOFF_AT && !REGISTRATION_CUTOFF_EXEMPT_EVENTS.has(slug)) {
+    return {
+      closed: true,
+      timeLabel: REGISTRATION_CUTOFF_TIME_LABEL,
+      openLabel: getOpenEventsLabel(now)
+    };
+  }
+
+  return { closed: false };
+}
+
+function getOpenEventsLabel(now = Date.now()) {
+  if (now >= SHOOTING_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_LABEL;
+  return REGISTRATION_CUTOFF_OPEN_LABEL;
 }
 
 function slugify(value) {
