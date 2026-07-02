@@ -1,8 +1,8 @@
 const PRICE_PER_ITEM = 70000; // Rs. 700 in paise
 const REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T12:00:00+05:30");
-const REGISTRATION_CUTOFF_EXEMPT_EVENTS = new Set(["badminton", "gymnastics", "chess"]);
+const REGISTRATION_CUTOFF_EXEMPT_EVENTS = new Set(["badminton", "gymnastics", "chess", "shooting"]);
 const REGISTRATION_CUTOFF_TIME_LABEL = "12:00 PM IST";
-const REGISTRATION_CUTOFF_OPEN_LABEL = "Badminton, Gymnastics and Chess registrations remain open.";
+const REGISTRATION_CUTOFF_OPEN_LABEL = "Badminton, Gymnastics, Chess and Shooting registrations remain open.";
 const TRACKING_COLUMNS = [
   "id",
   "participant_name",

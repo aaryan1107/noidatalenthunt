@@ -2168,10 +2168,10 @@ Object.assign(REGISTRATION_CONFIG['table-tennis'], {
 });
 REGISTRATION_CONFIG.gymnastics.lastDay = '7th July 2026';
 const REGISTRATION_CUTOFF_AT = Date.parse('2026-07-02T12:00:00+05:30');
-const REGISTRATION_CUTOFF_EXEMPT = new Set(['badminton', 'gymnastics', 'chess']);
+const REGISTRATION_CUTOFF_EXEMPT = new Set(['badminton', 'gymnastics', 'chess', 'shooting']);
 const REGISTRATION_CUTOFF_LABEL = 'Registrations Closed';
 const REGISTRATION_CUTOFF_TIME_LABEL = '12:00 PM IST';
-const REGISTRATION_CUTOFF_OPEN_LABEL = 'Badminton, Gymnastics and Chess registrations remain open.';
+const REGISTRATION_CUTOFF_OPEN_LABEL = 'Badminton, Gymnastics, Chess and Shooting registrations remain open.';
 const REGISTRATION_API_BASE = "/api"; // Production storage + payment verification backend, example: https://api.noidatalenthunt.com
 const RAZORPAY_KEY_ID = ""; // Production Razorpay public key only. Never put secret key in this HTML.
 const DIRECT_RAZORPAY_LINK_FALLBACK = false; // While backend is pending, the single Pay & Register button opens the event Razorpay link.
