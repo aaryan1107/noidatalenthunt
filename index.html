@@ -2167,6 +2167,10 @@ Object.assign(REGISTRATION_CONFIG['table-tennis'], {
   lastDay: 'Registrations Closed'
 });
 REGISTRATION_CONFIG.gymnastics.lastDay = '7th July 2026';
+const REGISTRATION_CUTOFF_AT = Date.parse('2026-07-02T12:00:00+05:30');
+const REGISTRATION_CUTOFF_EXEMPT = new Set(['chess']);
+const REGISTRATION_CUTOFF_LABEL = 'Registrations Closed';
+const REGISTRATION_CUTOFF_TIME_LABEL = '12:00 PM IST';
 const REGISTRATION_API_BASE = "/api"; // Production storage + payment verification backend, example: https://api.noidatalenthunt.com
 const RAZORPAY_KEY_ID = ""; // Production Razorpay public key only. Never put secret key in this HTML.
 const DIRECT_RAZORPAY_LINK_FALLBACK = false; // While backend is pending, the single Pay & Register button opens the event Razorpay link.
@@ -2181,6 +2185,69 @@ const arenaGroups = {
   arts: ['singing','dance','instrumental-music'],
   skills: ['debate']
 };
+
+function applyTimedRegistrationClosure(now = Date.now()){
+  if(now < REGISTRATION_CUTOFF_AT) return false;
+
+  let changed = false;
+  Object.entries(REGISTRATION_CONFIG).forEach(([slug, cfg]) => {
+    if(REGISTRATION_CUTOFF_EXEMPT.has(slug)) return;
+
+    const closedMessage = `${cfg.title} registrations are now closed. No new ${cfg.title} responses or payments are being accepted after ${REGISTRATION_CUTOFF_TIME_LABEL}. Chess registration remains open.`;
+
+    if(!cfg.closed || cfg.closedMessage !== closedMessage){
+      changed = true;
+    }
+
+    Object.assign(cfg, {
+      closed: true,
+      closedLabel: REGISTRATION_CUTOFF_LABEL,
+      closedMessage,
+      intro: `${cfg.title} registrations are now closed. Existing confirmed participants will receive reporting details from the organising team.`,
+      lastDay: REGISTRATION_CUTOFF_LABEL
+    });
+  });
+
+  return changed;
+}
+
+function syncClosedCategoryButtons(){
+  document.querySelectorAll('.cat-tag[data-option]').forEach(link => {
+    const slug = link.dataset.option;
+    const cfg = REGISTRATION_CONFIG[slug];
+    if(!cfg) return;
+
+    link.classList.toggle('closed', Boolean(cfg.closed));
+    link.textContent = cfg.closed ? `${cfg.title} · Closed` : cfg.title;
+    link.setAttribute(
+      'aria-label',
+      cfg.closed ? `${cfg.title} registrations closed` : `Open ${cfg.title} registration form`
+    );
+  });
+}
+
+function currentRegistrationSlug(){
+  const formSlug = document.getElementById('registrationForm')?.dataset.registrationSlug;
+  if(formSlug) return formSlug;
+
+  const match = location.hash.match(/^#register-(.+)$/);
+  return match ? match[1] : null;
+}
+
+function enforceTimedRegistrationClosure(){
+  const changed = applyTimedRegistrationClosure();
+  syncClosedCategoryButtons();
+
+  if(changed){
+    renderSidebars();
+    const slug = currentRegistrationSlug();
+    if(slug && REGISTRATION_CONFIG[slug]?.closed){
+      renderRegistration(slug);
+    }
+  }
+
+  return changed;
+}
 
 const RULEBOOK_LINKS = {
   badminton: 'PSL%20Workbook/PSL%20Badminton.pdf',
@@ -2553,6 +2620,8 @@ function bindRegistrationForm(){
       }
     };
     const slug = form.dataset.registrationSlug;
+    applyTimedRegistrationClosure();
+    syncClosedCategoryButtons();
     const cfg = REGISTRATION_CONFIG[slug];
 
     if(cfg?.closed){
@@ -2731,6 +2800,7 @@ function scrollToRegistrationPanel(){
 }
 
 function openRegistrationBySlug(slug, shouldPushHash = true){
+  enforceTimedRegistrationClosure();
   if(!slug || !REGISTRATION_CONFIG[slug]) return;
 
   document.querySelector('.reg-topline')?.classList.add('visible');
@@ -2770,6 +2840,13 @@ document.querySelectorAll('.cat-tag[data-option]').forEach(link => {
     link.setAttribute('data-open-registration', slug);
   }
 });
+
+enforceTimedRegistrationClosure();
+const cutoffDelay = REGISTRATION_CUTOFF_AT - Date.now();
+if(cutoffDelay > 0){
+  setTimeout(enforceTimedRegistrationClosure, cutoffDelay + 50);
+}
+setInterval(enforceTimedRegistrationClosure, 15000);
 
 renderSidebars();
 window.addEventListener('hashchange', openFromHash);

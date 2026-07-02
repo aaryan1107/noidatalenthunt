@@ -1,4 +1,7 @@
 const PRICE_PER_ITEM = 70000; // Rs. 700 in paise
+const REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T12:00:00+05:30");
+const REGISTRATION_CUTOFF_EXEMPT_EVENTS = new Set(["chess"]);
+const REGISTRATION_CUTOFF_TIME_LABEL = "12:00 PM IST";
 const TRACKING_COLUMNS = [
   "id",
   "participant_name",
@@ -44,6 +47,13 @@ export async function onRequestPost(context) {
         success: false,
         error: "Missing participant name or event."
       }, 400);
+    }
+
+    if (isRegistrationClosedByCutoff(eventName)) {
+      return jsonResponse({
+        success: false,
+        error: `${eventName} registrations are now closed. No new ${eventName} responses or payments are being accepted after ${REGISTRATION_CUTOFF_TIME_LABEL}. Chess registration remains open.`
+      }, 403);
     }
 
     const mobileNumber = normalizeMobileNumber(body.contact);
@@ -322,6 +332,13 @@ function requiredEnv(env) {
   if (!env.SUPABASE_URL) missing.push("SUPABASE_URL");
   if (!env.SUPABASE_SERVICE_ROLE_KEY) missing.push("SUPABASE_SERVICE_ROLE_KEY");
   return missing;
+}
+
+function isRegistrationClosedByCutoff(eventName, now = Date.now()) {
+  if (now < REGISTRATION_CUTOFF_AT) return false;
+
+  const slug = slugify(eventName);
+  return !REGISTRATION_CUTOFF_EXEMPT_EVENTS.has(slug);
 }
 
 function slugify(value) {
