@@ -6,10 +6,12 @@ const SHOOTING_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T17:30:00+05:30");
 const SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL = "5:30 PM IST";
 const OPEN_EVENTS_LABEL = "Badminton, Gymnastics and Chess registrations remain open.";
 const REGISTRATION_CUTOFF_OPEN_LABEL = `${OPEN_EVENTS_LABEL} Shooting registrations close at ${SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL}.`;
-const CHESS_CLOSED_DAY_ONE_OPTIONS = new Set([
+const CHESS_CLOSED_DAY_OPTIONS = new Set([
   normalizeSelectionLabel("Under-11 (Born on or after 01/01/2015) - Day 1"),
   normalizeSelectionLabel("Under-13 (Born on or after 01/01/2013) - Day 1"),
-  normalizeSelectionLabel("Under-15 (Born on or after 01/01/2011) - Day 1")
+  normalizeSelectionLabel("Under-15 (Born on or after 01/01/2011) - Day 1"),
+  normalizeSelectionLabel("Under-6 (Born on or after 01/01/2020) - Day 2"),
+  normalizeSelectionLabel("Under-8 (Born on or after 01/01/2018) - Day 2")
 ]);
 const TRACKING_COLUMNS = [
   "id",
@@ -101,14 +103,14 @@ export async function onRequestPost(context) {
     }
 
     if (slugify(eventName) === "chess") {
-      const closedDayOneItem = cartItems.find(item =>
-        CHESS_CLOSED_DAY_ONE_OPTIONS.has(normalizeSelectionLabel(item.label))
+      const closedChessItem = cartItems.find(item =>
+        CHESS_CLOSED_DAY_OPTIONS.has(normalizeSelectionLabel(item.label))
       );
 
-      if (closedDayOneItem) {
+      if (closedChessItem) {
         return jsonResponse({
           success: false,
-          error: "Chess Day 1 registrations are now closed. Please select only the available Day 2 or Day 3 chess categories."
+          error: "Chess Day 1 and Day 2 registrations are now closed. Please select only the available Day 3 chess categories."
         }, 403);
       }
     }
