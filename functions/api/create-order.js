@@ -4,8 +4,11 @@ const REGISTRATION_CUTOFF_EXEMPT_EVENTS = new Set(["badminton", "gymnastics", "c
 const REGISTRATION_CUTOFF_TIME_LABEL = "12:00 PM IST";
 const SHOOTING_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T17:30:00+05:30");
 const SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL = "5:30 PM IST";
-const OPEN_EVENTS_LABEL = "Badminton, Gymnastics and Chess registrations remain open.";
-const REGISTRATION_CUTOFF_OPEN_LABEL = `${OPEN_EVENTS_LABEL} Shooting registrations close at ${SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL}.`;
+const CHESS_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-04T19:30:00+05:30");
+const CHESS_REGISTRATION_CUTOFF_TIME_LABEL = "7:30 PM IST";
+const OPEN_EVENTS_WITH_CHESS_LABEL = `Badminton, Gymnastics and Chess registrations remain open until ${CHESS_REGISTRATION_CUTOFF_TIME_LABEL}.`;
+const OPEN_EVENTS_AFTER_CHESS_LABEL = "Badminton and Gymnastics registrations remain open.";
+const REGISTRATION_CUTOFF_OPEN_LABEL = `${OPEN_EVENTS_WITH_CHESS_LABEL} Shooting registrations close at ${SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL}.`;
 const CHESS_CLOSED_DAY_OPTIONS = new Set([
   normalizeSelectionLabel("Under-11 (Born on or after 01/01/2015) - Day 1"),
   normalizeSelectionLabel("Under-13 (Born on or after 01/01/2013) - Day 1"),
@@ -362,11 +365,19 @@ function requiredEnv(env) {
 function getRegistrationClosure(eventName, now = Date.now()) {
   const slug = slugify(eventName);
 
+  if (slug === "chess" && now >= CHESS_REGISTRATION_CUTOFF_AT) {
+    return {
+      closed: true,
+      timeLabel: CHESS_REGISTRATION_CUTOFF_TIME_LABEL,
+      openLabel: OPEN_EVENTS_AFTER_CHESS_LABEL
+    };
+  }
+
   if (slug === "shooting" && now >= SHOOTING_REGISTRATION_CUTOFF_AT) {
     return {
       closed: true,
       timeLabel: SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL,
-      openLabel: OPEN_EVENTS_LABEL
+      openLabel: getOpenEventsLabel(now)
     };
   }
 
@@ -382,7 +393,8 @@ function getRegistrationClosure(eventName, now = Date.now()) {
 }
 
 function getOpenEventsLabel(now = Date.now()) {
-  if (now >= SHOOTING_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_LABEL;
+  if (now >= CHESS_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_AFTER_CHESS_LABEL;
+  if (now >= SHOOTING_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_WITH_CHESS_LABEL;
   return REGISTRATION_CUTOFF_OPEN_LABEL;
 }
 
