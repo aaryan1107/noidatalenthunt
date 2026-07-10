@@ -6,8 +6,14 @@ const SHOOTING_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T17:30:00+05:30");
 const SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL = "5:30 PM IST";
 const CHESS_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-04T19:30:00+05:30");
 const CHESS_REGISTRATION_CUTOFF_TIME_LABEL = "7:30 PM IST";
+const BADMINTON_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-10T16:00:00+05:30");
+const BADMINTON_REGISTRATION_CUTOFF_TIME_LABEL = "4:00 PM IST";
+const GYMNASTICS_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-10T17:00:00+05:30");
+const GYMNASTICS_REGISTRATION_CUTOFF_TIME_LABEL = "5:00 PM IST";
 const OPEN_EVENTS_WITH_CHESS_LABEL = `Badminton, Gymnastics and Chess registrations remain open until ${CHESS_REGISTRATION_CUTOFF_TIME_LABEL}.`;
-const OPEN_EVENTS_AFTER_CHESS_LABEL = "Badminton and Gymnastics registrations remain open.";
+const OPEN_EVENTS_BEFORE_BADMINTON_GYMNASTICS_CUTOFF_LABEL = `Badminton registrations remain open until ${BADMINTON_REGISTRATION_CUTOFF_TIME_LABEL}. Gymnastics registrations remain open until ${GYMNASTICS_REGISTRATION_CUTOFF_TIME_LABEL}.`;
+const OPEN_EVENTS_AFTER_BADMINTON_CUTOFF_LABEL = `Gymnastics registrations remain open until ${GYMNASTICS_REGISTRATION_CUTOFF_TIME_LABEL}.`;
+const OPEN_EVENTS_AFTER_GYMNASTICS_CUTOFF_LABEL = "All remaining registrations are closed.";
 const REGISTRATION_CUTOFF_OPEN_LABEL = `${OPEN_EVENTS_WITH_CHESS_LABEL} Shooting registrations close at ${SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL}.`;
 const CHESS_CLOSED_DAY_OPTIONS = new Set([
   normalizeSelectionLabel("Under-11 (Born on or after 01/01/2015) - Day 1"),
@@ -365,11 +371,27 @@ function requiredEnv(env) {
 function getRegistrationClosure(eventName, now = Date.now()) {
   const slug = slugify(eventName);
 
+  if (slug === "badminton" && now >= BADMINTON_REGISTRATION_CUTOFF_AT) {
+    return {
+      closed: true,
+      timeLabel: BADMINTON_REGISTRATION_CUTOFF_TIME_LABEL,
+      openLabel: getOpenEventsLabel(now)
+    };
+  }
+
+  if (slug === "gymnastics" && now >= GYMNASTICS_REGISTRATION_CUTOFF_AT) {
+    return {
+      closed: true,
+      timeLabel: GYMNASTICS_REGISTRATION_CUTOFF_TIME_LABEL,
+      openLabel: getOpenEventsLabel(now)
+    };
+  }
+
   if (slug === "chess" && now >= CHESS_REGISTRATION_CUTOFF_AT) {
     return {
       closed: true,
       timeLabel: CHESS_REGISTRATION_CUTOFF_TIME_LABEL,
-      openLabel: OPEN_EVENTS_AFTER_CHESS_LABEL
+      openLabel: getOpenEventsLabel(now)
     };
   }
 
@@ -393,7 +415,9 @@ function getRegistrationClosure(eventName, now = Date.now()) {
 }
 
 function getOpenEventsLabel(now = Date.now()) {
-  if (now >= CHESS_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_AFTER_CHESS_LABEL;
+  if (now >= GYMNASTICS_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_AFTER_GYMNASTICS_CUTOFF_LABEL;
+  if (now >= BADMINTON_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_AFTER_BADMINTON_CUTOFF_LABEL;
+  if (now >= CHESS_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_BEFORE_BADMINTON_GYMNASTICS_CUTOFF_LABEL;
   if (now >= SHOOTING_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_WITH_CHESS_LABEL;
   return REGISTRATION_CUTOFF_OPEN_LABEL;
 }
