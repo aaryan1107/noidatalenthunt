@@ -1,3 +1,6 @@
+const REGISTRATION_TABLE = "registrations_october_2026";
+const REGISTRATION_SESSION = "October 2026";
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -158,11 +161,13 @@ function buildPaidRegistrationRow({ registration_id, razorpay_order_id, razorpay
 
   return {
     id: registration_id,
+    session_name: pending?.session_name || registration.session_name || REGISTRATION_SESSION,
 
     participant_name: registration.participant_name || pending?.participant_name || "",
     dob: registration.dob || pending?.dob || null,
     age: registration.age || pending?.age || null,
     school: registration.school || pending?.school || "",
+    address: registration.address || pending?.address || "",
     contact: registration.contact || pending?.contact || "",
     email: registration.email || pending?.email || "",
     id_number: registration.id_number || pending?.id_number || "",
@@ -179,6 +184,7 @@ function buildPaidRegistrationRow({ registration_id, razorpay_order_id, razorpay
       amount: payment.amount,
       currency: payment.currency,
       registration_id,
+      session_name: pending?.session_name || registration.session_name || REGISTRATION_SESSION,
       razorpay_order_id,
       razorpay_payment_id
     },
@@ -251,7 +257,7 @@ async function captureRazorpayPayment(env, paymentId, amount) {
 }
 
 async function findPendingRegistration(env, registrationId, orderId) {
-  const url = supabaseRestUrl(env, `registrations?select=*&id=eq.${encodeURIComponent(registrationId)}&razorpay_order_id=eq.${encodeURIComponent(orderId)}&limit=1`);
+  const url = supabaseRestUrl(env, `${REGISTRATION_TABLE}?select=*&id=eq.${encodeURIComponent(registrationId)}&razorpay_order_id=eq.${encodeURIComponent(orderId)}&limit=1`);
 
   const res = await fetch(url, {
     method: "GET",
@@ -271,7 +277,7 @@ async function findPendingRegistration(env, registrationId, orderId) {
 }
 
 async function updateRegistration(env, id, row) {
-  const res = await fetch(supabaseRestUrl(env, `registrations?id=eq.${encodeURIComponent(id)}`), {
+  const res = await fetch(supabaseRestUrl(env, `${REGISTRATION_TABLE}?id=eq.${encodeURIComponent(id)}`), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

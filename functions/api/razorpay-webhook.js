@@ -1,3 +1,5 @@
+const REGISTRATION_TABLE = "registrations_october_2026";
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -192,7 +194,7 @@ function validatePaymentPatch(patch, pending) {
 }
 
 async function findRegistrationByOrderId(env, razorpayOrderId) {
-  const res = await fetch(supabaseRestUrl(env, `registrations?select=*&razorpay_order_id=eq.${encodeURIComponent(razorpayOrderId)}&limit=1`), {
+  const res = await fetch(supabaseRestUrl(env, `${REGISTRATION_TABLE}?select=*&razorpay_order_id=eq.${encodeURIComponent(razorpayOrderId)}&limit=1`), {
     method: "GET",
     headers: {
       "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
@@ -211,7 +213,7 @@ async function findRegistrationByOrderId(env, razorpayOrderId) {
 }
 
 async function updateRegistration(env, registrationId, data) {
-  const res = await fetch(supabaseRestUrl(env, `registrations?id=eq.${encodeURIComponent(registrationId)}`), {
+  const res = await fetch(supabaseRestUrl(env, `${REGISTRATION_TABLE}?id=eq.${encodeURIComponent(registrationId)}`), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

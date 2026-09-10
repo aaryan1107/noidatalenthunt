@@ -1,33 +1,22 @@
-const PRICE_PER_ITEM = 70000; // Rs. 700 in paise
-const REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T12:00:00+05:30");
-const REGISTRATION_CUTOFF_EXEMPT_EVENTS = new Set(["badminton", "gymnastics", "chess", "shooting"]);
-const REGISTRATION_CUTOFF_TIME_LABEL = "12:00 PM IST";
-const SHOOTING_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-02T17:30:00+05:30");
-const SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL = "5:30 PM IST";
-const CHESS_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-04T19:30:00+05:30");
-const CHESS_REGISTRATION_CUTOFF_TIME_LABEL = "7:30 PM IST";
-const BADMINTON_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-10T16:00:00+05:30");
-const BADMINTON_REGISTRATION_CUTOFF_TIME_LABEL = "4:00 PM IST";
-const GYMNASTICS_REGISTRATION_CUTOFF_AT = Date.parse("2026-07-10T17:00:00+05:30");
-const GYMNASTICS_REGISTRATION_CUTOFF_TIME_LABEL = "5:00 PM IST";
-const OPEN_EVENTS_WITH_CHESS_LABEL = `Badminton, Gymnastics and Chess registrations remain open until ${CHESS_REGISTRATION_CUTOFF_TIME_LABEL}.`;
-const OPEN_EVENTS_BEFORE_BADMINTON_GYMNASTICS_CUTOFF_LABEL = `Badminton registrations remain open until ${BADMINTON_REGISTRATION_CUTOFF_TIME_LABEL}. Gymnastics registrations remain open until ${GYMNASTICS_REGISTRATION_CUTOFF_TIME_LABEL}.`;
-const OPEN_EVENTS_AFTER_BADMINTON_CUTOFF_LABEL = `Gymnastics registrations remain open until ${GYMNASTICS_REGISTRATION_CUTOFF_TIME_LABEL}.`;
-const OPEN_EVENTS_AFTER_GYMNASTICS_CUTOFF_LABEL = "All remaining registrations are closed.";
-const REGISTRATION_CUTOFF_OPEN_LABEL = `${OPEN_EVENTS_WITH_CHESS_LABEL} Shooting registrations close at ${SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL}.`;
-const CHESS_CLOSED_DAY_OPTIONS = new Set([
-  normalizeSelectionLabel("Under-11 (Born on or after 01/01/2015) - Day 1"),
-  normalizeSelectionLabel("Under-13 (Born on or after 01/01/2013) - Day 1"),
-  normalizeSelectionLabel("Under-15 (Born on or after 01/01/2011) - Day 1"),
-  normalizeSelectionLabel("Under-6 (Born on or after 01/01/2020) - Day 2"),
-  normalizeSelectionLabel("Under-8 (Born on or after 01/01/2018) - Day 2")
+const PRICE_PER_ITEM = 10000; // Rs. 100 in paise
+const REGISTRATION_TABLE = "registrations_october_2026";
+const REGISTRATION_SESSION = "October 2026";
+const OPEN_SPORTS_EVENTS = new Set([
+  "badminton",
+  "table-tennis",
+  "chess",
+  "swimming",
+  "gymnastics",
+  "shooting"
 ]);
 const TRACKING_COLUMNS = [
   "id",
+  "session_name",
   "participant_name",
   "dob",
   "age",
   "school",
+  "address",
   "contact",
   "email",
   "id_number",
@@ -61,6 +50,7 @@ export async function onRequestPost(context) {
 
     const arena = body.arena || "";
     const eventName = body.event || "";
+    const categorySlug = slugify(body.category_slug || body.categorySlug || eventName);
 
     if (!participantName || !eventName) {
       return jsonResponse({
@@ -69,12 +59,11 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    const closure = getRegistrationClosure(eventName);
-    if (closure.closed) {
+    if (!OPEN_SPORTS_EVENTS.has(categorySlug)) {
       return jsonResponse({
         success: false,
-        error: `${eventName} registrations are now closed. No new ${eventName} responses or payments are being accepted after ${closure.timeLabel}. ${closure.openLabel}`
-      }, 403);
+        error: "Only sports registrations are open for the October 2026 session."
+      }, 400);
     }
 
     const mobileNumber = normalizeMobileNumber(body.contact);
@@ -85,6 +74,13 @@ export async function onRequestPost(context) {
       }, 400);
     }
     body.contact = mobileNumber;
+
+    if (!String(body.address || "").trim()) {
+      return jsonResponse({
+        success: false,
+        error: "Please enter the participant address."
+      }, 400);
+    }
 
     const missing = requiredEnv(env);
     if (missing.length > 0) {
@@ -109,19 +105,6 @@ export async function onRequestPost(context) {
         success: false,
         error: "Table Tennis allows a maximum of 2 categories only."
       }, 400);
-    }
-
-    if (slugify(eventName) === "chess") {
-      const closedChessItem = cartItems.find(item =>
-        CHESS_CLOSED_DAY_OPTIONS.has(normalizeSelectionLabel(item.label))
-      );
-
-      if (closedChessItem) {
-        return jsonResponse({
-          success: false,
-          error: "Chess Day 1 and Day 2 registrations are now closed. Please select only the available Day 3 chess categories."
-        }, 403);
-      }
     }
 
     const amount = cartItems.length * PRICE_PER_ITEM;
@@ -181,7 +164,7 @@ export async function onRequestPost(context) {
       orderId: order.id
     });
 
-    const insertRes = await fetch(supabaseRestUrl(env, "registrations"), {
+    const insertRes = await fetch(supabaseRestUrl(env, REGISTRATION_TABLE), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -238,11 +221,13 @@ function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, 
 
   return {
     id: registrationId,
+    session_name: REGISTRATION_SESSION,
 
     participant_name: body.participant_name || body.participantName || body.name || "",
     dob: body.dob || null,
     age: body.age || null,
     school: body.school || "",
+    address: String(body.address || "").trim(),
     contact: body.contact || "",
     email: body.email || "",
     id_number: body.id_number || "",
@@ -251,15 +236,17 @@ function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, 
 
     arena: body.arena || "",
     event: body.event || "",
-    category_slug: slugify(body.event || ""),
+    category_slug: slugify(body.category_slug || body.categorySlug || body.event || ""),
     selected_options: selectedOptions,
     form_data: {
       ...body,
+      address: String(body.address || "").trim(),
       cart_items: cartItems,
       cart_count: cartItems.length,
       amount,
       currency,
       registration_id: registrationId,
+      session_name: REGISTRATION_SESSION,
       razorpay_order_id: orderId
     },
 
@@ -274,7 +261,7 @@ function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, 
 }
 
 async function assertRegistrationTrackingReady(env) {
-  const res = await fetch(supabaseRestUrl(env, `registrations?select=${TRACKING_COLUMNS.join(",")}&limit=1`), {
+  const res = await fetch(supabaseRestUrl(env, `${REGISTRATION_TABLE}?select=${TRACKING_COLUMNS.join(",")}&limit=1`), {
     method: "GET",
     headers: {
       "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
@@ -368,72 +355,11 @@ function requiredEnv(env) {
   return missing;
 }
 
-function getRegistrationClosure(eventName, now = Date.now()) {
-  const slug = slugify(eventName);
-
-  if (slug === "badminton" && now >= BADMINTON_REGISTRATION_CUTOFF_AT) {
-    return {
-      closed: true,
-      timeLabel: BADMINTON_REGISTRATION_CUTOFF_TIME_LABEL,
-      openLabel: getOpenEventsLabel(now)
-    };
-  }
-
-  if (slug === "gymnastics" && now >= GYMNASTICS_REGISTRATION_CUTOFF_AT) {
-    return {
-      closed: true,
-      timeLabel: GYMNASTICS_REGISTRATION_CUTOFF_TIME_LABEL,
-      openLabel: getOpenEventsLabel(now)
-    };
-  }
-
-  if (slug === "chess" && now >= CHESS_REGISTRATION_CUTOFF_AT) {
-    return {
-      closed: true,
-      timeLabel: CHESS_REGISTRATION_CUTOFF_TIME_LABEL,
-      openLabel: getOpenEventsLabel(now)
-    };
-  }
-
-  if (slug === "shooting" && now >= SHOOTING_REGISTRATION_CUTOFF_AT) {
-    return {
-      closed: true,
-      timeLabel: SHOOTING_REGISTRATION_CUTOFF_TIME_LABEL,
-      openLabel: getOpenEventsLabel(now)
-    };
-  }
-
-  if (now >= REGISTRATION_CUTOFF_AT && !REGISTRATION_CUTOFF_EXEMPT_EVENTS.has(slug)) {
-    return {
-      closed: true,
-      timeLabel: REGISTRATION_CUTOFF_TIME_LABEL,
-      openLabel: getOpenEventsLabel(now)
-    };
-  }
-
-  return { closed: false };
-}
-
-function getOpenEventsLabel(now = Date.now()) {
-  if (now >= GYMNASTICS_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_AFTER_GYMNASTICS_CUTOFF_LABEL;
-  if (now >= BADMINTON_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_AFTER_BADMINTON_CUTOFF_LABEL;
-  if (now >= CHESS_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_BEFORE_BADMINTON_GYMNASTICS_CUTOFF_LABEL;
-  if (now >= SHOOTING_REGISTRATION_CUTOFF_AT) return OPEN_EVENTS_WITH_CHESS_LABEL;
-  return REGISTRATION_CUTOFF_OPEN_LABEL;
-}
-
 function slugify(value) {
   return String(value || "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-}
-
-function normalizeSelectionLabel(value) {
-  return String(value || "")
-    .trim()
-    .replace(/\s+/g, " ")
-    .toLowerCase();
 }
 
 export async function onRequestOptions() {

@@ -1,3 +1,5 @@
+const REGISTRATION_TABLE = "registrations_october_2026";
+
 export async function onRequestGet(context) {
   const { request, env } = context;
 
@@ -27,10 +29,12 @@ export async function onRequestGet(context) {
 
     const checkedColumns = [
       "id",
+      "session_name",
       "participant_name",
       "dob",
       "age",
       "school",
+      "address",
       "contact",
       "email",
       "id_number",
@@ -50,7 +54,7 @@ export async function onRequestGet(context) {
       "created_at"
     ];
 
-    const res = await fetch(supabaseRestUrl(env, `registrations?select=${checkedColumns.join(",")}&limit=1`), {
+    const res = await fetch(supabaseRestUrl(env, `${REGISTRATION_TABLE}?select=${checkedColumns.join(",")}&limit=1`), {
       method: "GET",
       headers: {
         "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
@@ -70,7 +74,8 @@ export async function onRequestGet(context) {
 
     return jsonResponse({
       success: true,
-      message: "Cloudflare Function and Supabase connection are working.",
+      message: "Cloudflare Function and October registration table are working.",
+      registration_table: REGISTRATION_TABLE,
       checked_columns: checkedColumns,
       supabase_response: text ? JSON.parse(text) : []
     });
