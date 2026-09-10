@@ -1283,8 +1283,7 @@ footer h2 {
 }
 
 @media (max-width: 767px) {
-  .section-frame,
-  .hero {
+  .section-frame {
     width: min(100% - 32px, 1200px);
   }
 
