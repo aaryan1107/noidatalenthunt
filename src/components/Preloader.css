@@ -1,0 +1,217 @@
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  transition: opacity 0.55s var(--ease-out), visibility 0.55s var(--ease-out);
+}
+
+.preloader.is-leaving {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.preloader-core {
+  display: flex;
+  width: min(320px, 78vw);
+  flex-direction: column;
+  align-items: center;
+}
+
+.loader-figure {
+  width: 148px;
+  height: 148px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.2;
+}
+
+.loader-figure .loader-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+.preloader-badminton .loader-figure { color: var(--green-deep); }
+.preloader-swimming .loader-figure { color: var(--sky); }
+.preloader-shooting .loader-figure { color: var(--coral); }
+
+.loader-swing,
+.loader-target,
+.loader-stroke-a,
+.loader-stroke-b,
+.loader-shot {
+  stroke: currentColor;
+}
+
+/* Badminton — arm swings down into a smash, shuttle fires away on the same beat. */
+.loader-swing {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: loaderSmash 1.5s cubic-bezier(0.62, 0, 0.2, 1) infinite;
+}
+
+.loader-shuttle {
+  transform: translate(86px, 46px);
+  opacity: 0;
+  animation: loaderShuttle 1.5s cubic-bezier(0.3, 0, 0.1, 1) infinite;
+}
+
+@keyframes loaderSmash {
+  0% { transform: rotate(-58deg); }
+  38% { transform: rotate(-64deg); }
+  56% { transform: rotate(34deg); }
+  70% { transform: rotate(26deg); }
+  100% { transform: rotate(-58deg); }
+}
+
+@keyframes loaderShuttle {
+  0%, 52% { transform: translate(86px, 46px) scale(0.7); opacity: 0; }
+  58% { opacity: 1; }
+  92%, 100% { transform: translate(118px, 8px) scale(1); opacity: 0; }
+}
+
+/* Swimming — alternating forward strokes over drifting water lines. */
+.loader-stroke-a,
+.loader-stroke-b {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: loaderStroke 1.35s linear infinite;
+}
+
+.loader-stroke-a { translate: 46px 57px; }
+.loader-stroke-b { translate: 46px 57px; animation-delay: -0.675s; }
+
+.loader-kick {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: loaderKick 0.5s ease-in-out infinite alternate;
+}
+
+.loader-water {
+  opacity: 0.4;
+  animation: loaderWater 2.4s linear infinite;
+}
+
+@keyframes loaderStroke {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes loaderKick {
+  from { transform: rotate(-9deg); }
+  to { transform: rotate(11deg); }
+}
+
+@keyframes loaderWater {
+  from { transform: translateX(0); }
+  to { transform: translateX(-40px); }
+}
+
+/* Shooting — shot travels to the target, figure absorbs the recoil. */
+.loader-recoil {
+  animation: loaderRecoil 1.6s ease-out infinite;
+}
+
+.loader-target {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: loaderTarget 1.6s ease-out infinite;
+}
+
+.loader-shot {
+  stroke-dasharray: 10 26;
+  opacity: 0;
+  animation: loaderShot 1.6s ease-out infinite;
+}
+
+@keyframes loaderRecoil {
+  0%, 46% { transform: translateX(0); }
+  52% { transform: translateX(-4px); }
+  70%, 100% { transform: translateX(0); }
+}
+
+@keyframes loaderTarget {
+  0%, 60% { transform: scale(1); opacity: 0.75; }
+  68% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.75; }
+}
+
+@keyframes loaderShot {
+  0%, 46% { opacity: 0; transform: translateX(0); }
+  50% { opacity: 1; }
+  64% { opacity: 0; transform: translateX(20px); }
+  100% { opacity: 0; transform: translateX(20px); }
+}
+
+.preloader-readout {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 26px 0 12px;
+}
+
+.preloader-readout span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.preloader-readout strong {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.preloader-badminton .preloader-readout strong { color: var(--green-deep); }
+.preloader-swimming .preloader-readout strong { color: var(--sky); }
+.preloader-shooting .preloader-readout strong { color: var(--coral); }
+
+.preloader-track {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--sand);
+}
+
+.preloader-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: currentColor;
+  transition: width 0.18s linear;
+}
+
+.preloader-badminton .preloader-track i { background: var(--green-deep); }
+.preloader-swimming .preloader-track i { background: var(--sky); }
+.preloader-shooting .preloader-track i { background: var(--coral); }
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-swing,
+  .loader-shuttle,
+  .loader-stroke-a,
+  .loader-stroke-b,
+  .loader-kick,
+  .loader-water,
+  .loader-recoil,
+  .loader-target,
+  .loader-shot {
+    animation: none;
+  }
+
+  .loader-shuttle,
+  .loader-shot {
+    opacity: 1;
+  }
+}

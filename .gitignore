@@ -1,0 +1,17 @@
+node_modules/
+dist/
+
+.dev.vars
+.wrangler/
+.DS_Store
+**/.DS_Store
+
+# Participant data and internal media must never reach this repo.
+registrations/
+private/
+Certificate/
+PSL Workbook/
+*.csv
+
+# Raw source video; the web-optimised copy lives in public/archive/.
+founder vision.mp4

@@ -1,3 +1,5 @@
+import { onboardingFor } from "./_sport-onboarding.js";
+
 const REGISTRATION_TABLE = "registrations_october_2026";
 const REGISTRATION_SESSION = "October 2026";
 
@@ -110,7 +112,8 @@ export async function onRequestPost(context) {
         success: true,
         already_confirmed: true,
         message: "Payment already verified and registration already stored.",
-        registration_id: pending.id
+        registration_id: pending.id,
+        onboarding: buildOnboarding(pending.category_slug)
       });
     }
 
@@ -139,15 +142,31 @@ export async function onRequestPost(context) {
     return jsonResponse({
       success: true,
       message: "Payment verified and registration stored successfully.",
-      registration: saved
+      registration: saved,
+      onboarding: buildOnboarding(saved?.category_slug || pending.category_slug)
     });
 
   } catch (error) {
+    // Surfaced in Cloudflare logs; the client keeps a generic message.
+    console.error("verify-payment failed", error);
     return jsonResponse({
       success: false,
       error: "Verification server error."
     }, 500);
   }
+}
+
+// Everything the confirmation screen needs to onboard a paid participant.
+function buildOnboarding(categorySlug) {
+  const sport = onboardingFor(categorySlug);
+  if (!sport) return null;
+
+  return {
+    sport: sport.title,
+    whatsapp_url: sport.whatsapp,
+    rulebook_url: sport.rulebook,
+    contacts: sport.contacts
+  };
 }
 
 function buildPaidRegistrationRow({ registration_id, razorpay_order_id, razorpay_payment_id, registration, payment, pending }) {

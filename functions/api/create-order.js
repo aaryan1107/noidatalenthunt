@@ -201,6 +201,7 @@ export async function onRequestPost(context) {
     });
 
   } catch (error) {
+    console.error("create-order failed", error);
     return jsonResponse({
       success: false,
       error: "Server error while creating order."
