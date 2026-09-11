@@ -65,18 +65,17 @@ export function useSiteMotion(rootRef, ready = true) {
 
             // Section copy that isn't part of a bespoke timeline still gets a reveal.
             const revealTargets = gsap.utils.toArray(
-              ".sports-section .section-heading > *, .sport-shell, .archive-note, footer h2, footer .footer-meta > *",
+              ".sports-section .section-heading > *, .sport-shell, .archive-note, .closing-quote p, footer h2, footer .footer-meta > *",
             );
             revealTargets.forEach((target) => {
               const tween = gsap.fromTo(
                 target,
-                { autoAlpha: 0, y: 30 },
+                { autoAlpha: 0, y: 46 },
                 {
                   autoAlpha: 1,
                   y: 0,
-                  duration: 0.72,
-                  ease: "power3.out",
-                  scrollTrigger: { trigger: target, start: "top 88%", once: true },
+                  ease: "none",
+                  scrollTrigger: { trigger: target, start: "top 95%", end: "top 55%", scrub: 0.6 },
                 },
               );
               cleanup.push(() => tween.kill());
@@ -89,7 +88,7 @@ export function useSiteMotion(rootRef, ready = true) {
               const rows = gsap.utils.toArray(".fact-row");
 
               const reveal = gsap.timeline({
-                scrollTrigger: { trigger: july, start: "top 78%", end: "top 30%", scrub: 0.6 },
+                scrollTrigger: { trigger: july, start: "top 90%", end: "top 15%", scrub: 0.6 },
               });
               if (heading) {
                 reveal.fromTo(
@@ -108,7 +107,7 @@ export function useSiteMotion(rootRef, ready = true) {
 
               // The stats arrive as one stacked deck, then separate into the list.
               const deck = gsap.timeline({
-                scrollTrigger: { trigger: ".fact-list", start: "top 88%", end: "top 42%", scrub: 0.7 },
+                scrollTrigger: { trigger: ".fact-list", start: "top 95%", end: "top 25%", scrub: 0.7 },
               });
               deck.fromTo(
                 rows,

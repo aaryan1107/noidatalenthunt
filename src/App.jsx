@@ -155,7 +155,10 @@ function Hero() {
         </h1>
         <p className="hero-association hero-support">
           <BrandMark />
-          <span>In association with <strong>Prometheus School</strong></span>
+          <span className="hero-association-lines">
+            <span>Presented by <strong>Gauri Shiksha Foundation</strong></span>
+            <span>in association with <strong>Prometheus School</strong></span>
+          </span>
         </p>
         <p className="hero-intro hero-support">
           A city stage for young athletes to compete, be seen, and earn consideration for sports scholarships and high-performance training.
@@ -176,7 +179,6 @@ function Hero() {
 function JulyEdition() {
   const facts = [
     ["2K+", "registration records achieved across the July edition"],
-    ["₹10L", "total prize pool awarded across the July edition"],
     ["12", "disciplines across sports, arts and skills"],
     ["6", "sports on the first city-wide stage"],
   ];
@@ -665,6 +667,16 @@ function Registration({ slug, onClose }) {
   );
 }
 
+function ClosingQuote() {
+  return (
+    <section className="closing-quote">
+      <p>
+        <span aria-hidden="true">“</span>Every champion was once a child who simply needed a stage.<span aria-hidden="true">”</span>
+      </p>
+    </section>
+  );
+}
+
 function Footer() {
   return (
     <footer>
@@ -721,6 +733,7 @@ export default function App() {
         <SportsGrid selectSport={selectSport} />
         <OpportunitySplit />
         {sport && <Registration slug={selectedSport} onClose={() => { setSelectedSport(null); window.history.replaceState(null, "", "#sports"); }} />}
+        <ClosingQuote />
       </main>
       <Footer />
     </div>

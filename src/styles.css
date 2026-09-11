@@ -452,10 +452,20 @@ a {
 .hero-association {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin: 26px 0 0;
   color: rgba(245, 241, 228, 0.62);
   font-size: 14px;
+}
+
+.hero-association-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-association-lines span {
+  display: block;
 }
 
 .hero-association strong {
@@ -1183,6 +1193,31 @@ sup {
   .field textarea:focus {
     transform: translate3d(0, -1px, 0);
   }
+}
+
+.closing-quote {
+  padding: 120px 32px;
+  background: var(--ink);
+  text-align: center;
+}
+
+.closing-quote p {
+  max-width: 780px;
+  margin: 0 auto;
+  color: var(--cream);
+  font-family: "Times New Roman", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(24px, 3.6vw, 42px);
+  line-height: 1.35;
+}
+
+.closing-quote span[aria-hidden] {
+  color: var(--yellow);
+}
+
+@media (max-width: 767px) {
+  .closing-quote { padding: 84px 24px; }
 }
 
 footer {
