@@ -565,7 +565,6 @@ a {
 
 .july-heading h2,
 .section-heading h2,
-.registration-summary h2,
 footer h2 {
   margin: 0;
   font-size: clamp(48px, 6.4vw, 94px);
@@ -849,7 +848,12 @@ footer h2 {
 }
 
 .registration-summary h2 {
-  margin-bottom: 24px;
+  margin: 0 0 24px;
+  font-size: clamp(34px, 4.4vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  overflow-wrap: break-word;
 }
 
 .registration-summary > p {
