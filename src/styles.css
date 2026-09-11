@@ -1462,7 +1462,7 @@ footer h2 {
 .organiser-block {
   margin-top: 26px;
   padding-top: 22px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 1px solid rgba(44, 46, 42, 0.18);
 }
 
 .organiser-block h3 {
@@ -1496,18 +1496,18 @@ footer h2 {
 .organiser-block li a:hover { text-decoration: underline; }
 
 .organiser-block li span {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
   font-size: 13px;
 }
 
 .whatsapp-note {
   margin: 16px 0 0;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.6;
 }
 
-.whatsapp-note strong { color: var(--paper); }
+.whatsapp-note strong { color: var(--ink); }
 
 .confirm-panel {
   display: flex;

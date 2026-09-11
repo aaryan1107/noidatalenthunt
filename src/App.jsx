@@ -176,6 +176,15 @@ function Hero() {
   );
 }
 
+function splitChars(text) {
+  return text.split("").map((char, index) => (
+    <span className="type-char" key={index}>{char}</span>
+  ));
+}
+
+const JULY_BODY_COPY =
+  "The first edition brought together Badminton, Table Tennis, Chess, Swimming, Gymnastics and Shooting, alongside arts including Singing, Dance and Instrumental Music, and skills events such as Debate, Quiz and Business Plan. It was inspired by a simple gap in Noida: children from schools, academies, societies and independent entries deserved one serious platform to be seen. Its 2K+ registration records now give October’s sports-only chapter a credible foundation and a clearer athlete pathway.";
+
 function JulyEdition() {
   const facts = [
     ["2K+", "registration records achieved across the July edition"],
@@ -193,9 +202,7 @@ function JulyEdition() {
           <p className="lead">
             Noida Talent Hunt 2026 began in July as one city-wide stage for young people with sport, creativity and ideas to share.
           </p>
-          <p>
-            The first edition brought together Badminton, Table Tennis, Chess, Swimming, Gymnastics and Shooting, alongside arts including Singing, Dance and Instrumental Music, and skills events such as Debate, Quiz and Business Plan. It was inspired by a simple gap in Noida: children from schools, academies, societies and independent entries deserved one serious platform to be seen. Its 2K+ registration records now give October’s sports-only chapter a credible foundation and a clearer athlete pathway.
-          </p>
+          <p className="body-copy">{splitChars(JULY_BODY_COPY)}</p>
         </div>
         <div className="fact-list">
           {facts.map(([value, label]) => (

@@ -110,26 +110,40 @@ export function useSiteMotion(rootRef, ready = true) {
             const july = root.querySelector(".july-section");
             if (july) {
               const heading = july.querySelector(".july-heading h2");
-              const paragraphs = gsap.utils.toArray(".july-story p");
+              const lead = july.querySelector(".july-story .lead");
+              const typeChars = gsap.utils.toArray(".july-story .body-copy .type-char");
               const rows = gsap.utils.toArray(".fact-row");
 
               const reveal = gsap.timeline({
-                scrollTrigger: { trigger: july, start: "top 90%", end: "top 15%", scrub: 0.6 },
+                scrollTrigger: { trigger: july, start: "top 88%", end: "top -20%", scrub: 0.6 },
               });
+              // Three consecutive beats, not simultaneous: heading wipes in,
+              // then the lead line slides in from the right, then — once
+              // that's settled — the body copy types itself out.
               if (heading) {
                 reveal.fromTo(
                   heading,
                   { clipPath: "inset(0 100% 0 0)" },
-                  { clipPath: "inset(0 0% 0 0)", duration: 1.1, ease: "power3.out" },
+                  { clipPath: "inset(0 0% 0 0)", duration: 1, ease: "power3.out" },
                   0,
                 );
               }
-              reveal.fromTo(
-                paragraphs,
-                { autoAlpha: 0, y: 48 },
-                { autoAlpha: 1, y: 0, duration: 1, stagger: 0.35, ease: "power2.out" },
-                0.5,
-              );
+              if (lead) {
+                reveal.fromTo(
+                  lead,
+                  { autoAlpha: 0, x: 140 },
+                  { autoAlpha: 1, x: 0, duration: 1, ease: "power3.out" },
+                  1.1,
+                );
+              }
+              if (typeChars.length) {
+                reveal.fromTo(
+                  typeChars,
+                  { autoAlpha: 0 },
+                  { autoAlpha: 1, duration: 0.01, stagger: 0.035, ease: "none" },
+                  2.3,
+                );
+              }
 
               // The stats arrive as one stacked deck, then separate into the list.
               const deck = gsap.timeline({
