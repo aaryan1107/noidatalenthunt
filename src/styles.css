@@ -346,13 +346,16 @@ a {
   min-height: 100dvh;
   padding: 186px 0 96px;
   overflow: hidden;
-  background: #0d2417;
+  background: #08200f;
   text-align: center;
 }
 
 .hero-field {
   position: absolute;
-  inset: 0;
+  top: -15%;
+  right: 0;
+  bottom: -15%;
+  left: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
@@ -452,16 +455,17 @@ a {
 .hero-association {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 26px 0 0;
+  gap: 14px;
+  margin: 36px 0 4px;
   color: rgba(245, 241, 228, 0.62);
   font-size: 14px;
+  line-height: 1.6;
 }
 
 .hero-association-lines {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .hero-association-lines span {

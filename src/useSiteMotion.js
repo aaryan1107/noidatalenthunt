@@ -64,8 +64,11 @@ export function useSiteMotion(rootRef, ready = true) {
             cleanup.push(() => depth.kill());
 
             // Section copy that isn't part of a bespoke timeline still gets a reveal.
+            // These sit mid-page with plenty of scroll room below them, so the
+            // reveal can be tied to scroll distance (scrub) without risk of
+            // running out of page to scroll through.
             const revealTargets = gsap.utils.toArray(
-              ".sports-section .section-heading > *, .sport-shell, .archive-note, .closing-quote p, footer h2, footer .footer-meta > *",
+              ".sports-section .section-heading > *, .sport-shell, .archive-note",
             );
             revealTargets.forEach((target) => {
               const tween = gsap.fromTo(
@@ -76,6 +79,29 @@ export function useSiteMotion(rootRef, ready = true) {
                   y: 0,
                   ease: "none",
                   scrollTrigger: { trigger: target, start: "top 95%", end: "top 55%", scrub: 0.6 },
+                },
+              );
+              cleanup.push(() => tween.kill());
+            });
+
+            // The closing quote and footer are the last things on the page, so
+            // there isn't always enough scroll room below them to finish a
+            // scrubbed (distance-based) reveal — it can get stuck mid-transition
+            // once the page hits its max scroll. Use a normal timed reveal here
+            // instead, just triggered a beat after the element enters view.
+            const tailTargets = gsap.utils.toArray(
+              ".closing-quote p, footer h2, footer .footer-meta > *",
+            );
+            tailTargets.forEach((target) => {
+              const tween = gsap.fromTo(
+                target,
+                { autoAlpha: 0, y: 36 },
+                {
+                  autoAlpha: 1,
+                  y: 0,
+                  duration: 0.9,
+                  ease: "power2.out",
+                  scrollTrigger: { trigger: target, start: "top 90%", once: true },
                 },
               );
               cleanup.push(() => tween.kill());
@@ -94,15 +120,15 @@ export function useSiteMotion(rootRef, ready = true) {
                 reveal.fromTo(
                   heading,
                   { clipPath: "inset(0 100% 0 0)" },
-                  { clipPath: "inset(0 0% 0 0)", ease: "power3.out" },
+                  { clipPath: "inset(0 0% 0 0)", duration: 1.1, ease: "power3.out" },
                   0,
                 );
               }
               reveal.fromTo(
                 paragraphs,
-                { autoAlpha: 0, y: 26 },
-                { autoAlpha: 1, y: 0, stagger: 0.12, ease: "power2.out" },
-                0.15,
+                { autoAlpha: 0, y: 48 },
+                { autoAlpha: 1, y: 0, duration: 1, stagger: 0.35, ease: "power2.out" },
+                0.5,
               );
 
               // The stats arrive as one stacked deck, then separate into the list.
