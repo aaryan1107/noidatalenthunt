@@ -91,9 +91,6 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    if (pending?.form_data) {
-      pending.form_data.contact = mobileNumber;
-    }
     pending.contact = mobileNumber;
 
     if (payment.amount !== expectedAmount || payment.currency !== expectedCurrency) {
@@ -132,7 +129,6 @@ export async function onRequestPost(context) {
       registration_id: pending.id,
       razorpay_order_id,
       razorpay_payment_id,
-      registration: pending.form_data || {},
       payment,
       pending
     });
@@ -169,45 +165,11 @@ function buildOnboarding(categorySlug) {
   };
 }
 
-function buildPaidRegistrationRow({ registration_id, razorpay_order_id, razorpay_payment_id, registration, payment, pending }) {
-  const selectedOptions = pending?.selected_options || {};
-
-  for (const [key, value] of Object.entries(registration || {})) {
-    if (Array.isArray(value)) {
-      selectedOptions[key] = value;
-    }
-  }
-
+function buildPaidRegistrationRow({ registration_id, razorpay_order_id, razorpay_payment_id, payment, pending }) {
   return {
     id: registration_id,
-    session_name: pending?.session_name || registration.session_name || REGISTRATION_SESSION,
-
-    participant_name: registration.participant_name || pending?.participant_name || "",
-    dob: registration.dob || pending?.dob || null,
-    age: registration.age || pending?.age || null,
-    school: registration.school || pending?.school || "",
-    address: registration.address || pending?.address || "",
-    contact: registration.contact || pending?.contact || "",
-    email: registration.email || pending?.email || "",
-    id_number: registration.id_number || pending?.id_number || "",
-    age_group: registration.age_group || pending?.age_group || "",
-    gender: registration.gender || pending?.gender || "",
-
-    arena: registration.arena || pending?.arena || "",
-    event: registration.event || pending?.event || "",
-    category_slug: pending?.category_slug || slugify(registration.event || pending?.event || ""),
-    selected_options: selectedOptions,
-    form_data: {
-      ...(pending?.form_data || {}),
-      ...(registration || {}),
-      amount: payment.amount,
-      currency: payment.currency,
-      registration_id,
-      session_name: pending?.session_name || registration.session_name || REGISTRATION_SESSION,
-      razorpay_order_id,
-      razorpay_payment_id
-    },
-
+    session_name: pending?.session_name || REGISTRATION_SESSION,
+    contact: pending?.contact || "",
     amount: payment.amount,
     currency: payment.currency,
     razorpay_order_id,
@@ -347,13 +309,6 @@ function timingSafeEqual(a, b) {
   }
 
   return result === 0;
-}
-
-function slugify(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 }
 
 function requiredEnv(env) {

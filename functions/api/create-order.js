@@ -25,8 +25,15 @@ const TRACKING_COLUMNS = [
   "arena",
   "event",
   "category_slug",
-  "selected_options",
-  "form_data",
+  "selected_events",
+  "partner_name",
+  "fide_id",
+  "fide_rating",
+  "swimming_group",
+  "academy_name",
+  "shooting_age_category",
+  "shooting_entry_type",
+  "team_member_names",
   "amount",
   "currency",
   "razorpay_order_id",
@@ -210,16 +217,6 @@ export async function onRequestPost(context) {
 }
 
 function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, currency, orderId }) {
-  const selectedOptions = {};
-
-  for (const [key, value] of Object.entries(body)) {
-    if (Array.isArray(value)) {
-      selectedOptions[key] = value;
-    }
-  }
-
-  selectedOptions.cart_items = cartItems;
-
   return {
     id: registrationId,
     session_name: REGISTRATION_SESSION,
@@ -238,18 +235,15 @@ function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, 
     arena: body.arena || "",
     event: body.event || "",
     category_slug: slugify(body.category_slug || body.categorySlug || body.event || ""),
-    selected_options: selectedOptions,
-    form_data: {
-      ...body,
-      address: String(body.address || "").trim(),
-      cart_items: cartItems,
-      cart_count: cartItems.length,
-      amount,
-      currency,
-      registration_id: registrationId,
-      session_name: REGISTRATION_SESSION,
-      razorpay_order_id: orderId
-    },
+    selected_events: cartItems.map(item => item.label),
+    partner_name: body.partner_name || "",
+    fide_id: body.fide_id || "",
+    fide_rating: body.fide_rating || "",
+    swimming_group: body.swimming_group || "",
+    academy_name: body.academy_name || "",
+    shooting_age_category: body.shooting_age_category || "",
+    shooting_entry_type: body.shooting_entry_type || "",
+    team_member_names: body.team_member_names || "",
 
     amount,
     currency,
