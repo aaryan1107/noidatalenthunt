@@ -26,6 +26,7 @@ const TRACKING_COLUMNS = [
   "event",
   "category_slug",
   "selected_events",
+  "entry_type",
   "partner_name",
   "fide_id",
   "fide_rating",
@@ -34,6 +35,7 @@ const TRACKING_COLUMNS = [
   "shooting_age_category",
   "shooting_entry_type",
   "team_member_names",
+  "performance_requirement_details",
   "amount",
   "currency",
   "razorpay_order_id",
@@ -217,6 +219,8 @@ export async function onRequestPost(context) {
 }
 
 function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, currency, orderId }) {
+  const categorySlug = slugify(body.category_slug || body.categorySlug || body.event || "");
+
   return {
     id: registrationId,
     session_name: REGISTRATION_SESSION,
@@ -234,16 +238,18 @@ function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, 
 
     arena: body.arena || "",
     event: body.event || "",
-    category_slug: slugify(body.category_slug || body.categorySlug || body.event || ""),
+    category_slug: categorySlug,
     selected_events: cartItems.map(item => item.label),
-    partner_name: body.partner_name || "",
-    fide_id: body.fide_id || "",
-    fide_rating: body.fide_rating || "",
-    swimming_group: body.swimming_group || "",
-    academy_name: body.academy_name || "",
-    shooting_age_category: body.shooting_age_category || "",
-    shooting_entry_type: body.shooting_entry_type || "",
-    team_member_names: body.team_member_names || "",
+    entry_type: entryTypeFor(categorySlug, cartItems, body),
+    partner_name: categorySlug === "badminton" ? valueOrNA(body.partner_name) : "NA",
+    fide_id: categorySlug === "chess" ? valueOrNA(body.fide_id) : "NA",
+    fide_rating: categorySlug === "chess" ? valueOrNA(body.fide_rating) : "NA",
+    swimming_group: categorySlug === "swimming" ? valueOrNA(body.swimming_group) : "NA",
+    academy_name: categorySlug === "gymnastics" ? valueOrNA(body.academy_name) : "NA",
+    shooting_age_category: categorySlug === "shooting" ? valueOrNA(body.shooting_age_category) : "NA",
+    shooting_entry_type: categorySlug === "shooting" ? valueOrNA(body.shooting_entry_type) : "NA",
+    team_member_names: categorySlug === "shooting" ? valueOrNA(body.team_member_names) : "NA",
+    performance_requirement_details: performanceDetailsFor(categorySlug, body),
 
     amount,
     currency,
@@ -253,6 +259,31 @@ function buildPendingRegistrationRow({ registrationId, body, cartItems, amount, 
     payment_method: "",
     created_at: new Date().toISOString()
   };
+}
+
+function valueOrNA(value) {
+  const text = String(value || "").trim();
+  return text || "NA";
+}
+
+function entryTypeFor(categorySlug, cartItems, body) {
+  if (categorySlug === "badminton") {
+    const labels = cartItems.map(item => item.label);
+    const hasSingles = labels.some(label => /singles/i.test(label));
+    const hasDoubles = labels.some(label => /doubles/i.test(label));
+    if (hasSingles && hasDoubles) return "Singles and Doubles";
+    return hasDoubles ? "Doubles" : "Singles";
+  }
+  if (categorySlug === "shooting") return valueOrNA(body.shooting_entry_type);
+  if (["table-tennis", "chess", "swimming", "gymnastics"].includes(categorySlug)) return "Individual Entry";
+  return "NA";
+}
+
+function performanceDetailsFor(categorySlug, body) {
+  if (categorySlug !== "shooting") return "NA";
+  return body.shooting_entry_type === "Team Entry"
+    ? valueOrNA(body.team_member_names)
+    : "NA";
 }
 
 async function assertRegistrationTrackingReady(env) {
@@ -302,9 +333,7 @@ function normalizeCartItems(body) {
     "tt_categories",
     "ttCategories",
     "chess_age_categories",
-    "chessAgeCategories",
-    "selected_options",
-    "selectedOptions"
+    "chessAgeCategories"
   ];
 
   const items = [];
