@@ -248,6 +248,21 @@
 
 .archive-theatre-link:hover { color: #fff; }
 
+@media (max-width: 767px) {
+  .theatre-sound {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 14px;
+  }
+
+  .archive-theatre-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+}
+
 /* Desktop: one pinned stage where the gallery hands off to the theatre on scroll. */
 @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
   .archive-sequence {

@@ -7,3 +7,24 @@
 @media (max-width: 850px) { .portal-shell { width: min(100% - 28px, 1440px); padding-top: 30px; } .controls { grid-template-columns: 1fr 1fr; } .search, .export-button { grid-column: 1 / -1; } .export-button { width: 100%; } }
 @media (max-width: 560px) { .portal-header { display: block; } .quiet-button { margin-top: 20px; } .metric-grid { grid-template-columns: 1fr; } .metric-grid > div { padding: 16px 20px; } .controls { grid-template-columns: 1fr; } .controls select { width: 100%; } }
 .availability-panel { margin: 0 0 28px; padding: 25px; border: 1px solid #d9ddce; background: #fffdf7; box-shadow: 0 20px 60px #42503a0b; }.availability-heading { display: flex; justify-content: space-between; align-items: end; gap: 20px; }.availability-heading h2 { margin: 8px 0 0; font-size: 25px; letter-spacing: -.04em; }.availability-panel > p { max-width: 650px; margin: 12px 0 22px; color: #718075; font-size: 12px; line-height: 1.55; }.availability-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }.availability-row { display: grid; grid-template-columns: minmax(90px, 1fr) auto 112px auto; gap: 10px; align-items: end; padding: 14px; background: #f7f5ed; }.availability-row strong { padding-bottom: 10px; color: #25342c; font-size: 13px; }.availability-toggle { display: flex; align-items: center; gap: 7px; padding-bottom: 10px; color: #526054; font-size: 11px; font-weight: 700; }.availability-toggle input { width: 15px; height: 15px; accent-color: #4d912f; }.availability-capacity { display: grid; gap: 4px; color: #718075; font: 9px "DM Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }.availability-capacity input { width: 100%; margin: 0; padding: 8px 9px; border: 1px solid #d9ddce; background: #fffdf7; color: #25342c; font: 12px "DM Mono", monospace; }.availability-row button { padding: 9px 11px; border: 0; background: #25342c; color: white; font-size: 11px; font-weight: 700; cursor: pointer; }.availability-row button:disabled { cursor: wait; opacity: .6; } @media (max-width: 900px) { .availability-grid { grid-template-columns: 1fr; } } @media (max-width: 560px) { .availability-panel { padding: 18px; }.availability-row { grid-template-columns: 1fr 1fr; }.availability-row strong { grid-column: 1 / -1; padding-bottom: 0; }.availability-capacity { grid-column: 1; }.availability-row button { grid-column: 2; } }
+
+@media (max-width: 560px) {
+  .quiet-button,
+  .refresh,
+  .availability-row button { min-height: 44px; }
+
+  .table-wrap { overflow: visible; }
+  .table-wrap table,
+  .table-wrap tbody,
+  .table-wrap tr,
+  .table-wrap td { display: block; width: 100%; min-width: 0; }
+  .table-wrap thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .table-wrap tr { padding: 16px 18px; border-top: 1px solid #e5e8de; }
+  .table-wrap td { position: relative; min-height: 36px; padding: 8px 0 8px 106px; border: 0; }
+  .table-wrap td::before { position: absolute; top: 10px; left: 0; width: 90px; color: #718075; font: 9px "DM Mono", monospace; letter-spacing: .07em; text-transform: uppercase; content: ""; }
+  .table-wrap td:nth-child(1)::before { content: "Participant"; }
+  .table-wrap td:nth-child(2)::before { content: "Sport"; }
+  .table-wrap td:nth-child(3)::before { content: "Address"; }
+  .table-wrap td:nth-child(4)::before { content: "Payment"; }
+  .table-wrap td:nth-child(5)::before { content: "Razorpay"; }
+}

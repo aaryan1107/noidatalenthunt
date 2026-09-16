@@ -1691,6 +1691,25 @@ footer h2 {
   .contact-hero { padding-top: 72px; }.contact-content, .venue-section { grid-template-columns: 1fr; }.contact-content { padding-bottom: 90px; }.contact-form-panel { box-shadow: 10px 12px 0 rgba(109, 210, 67, .13); }.venue-section { min-height: auto; }.venue-copy { min-height: 430px; }.contact-footer { flex-wrap: wrap; }.whatsapp-float { right: 16px; bottom: 16px; }.whatsapp-float span { display: none; }
 }
 
+@media (max-width: 767px) {
+  .brand,
+  .contact-brand { min-height: 44px; }
+
+  .footer-meta { gap: 0; }
+  .footer-meta a,
+  .contact-instagram,
+  .venue-copy a,
+  .contact-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .contact-instagram { margin-top: 4px; }
+  .venue-copy a { margin-top: 20px; }
+  .contact-nav > a:last-child { min-height: 44px; }
+}
+
 .confirm-close {
   margin: 26px 0 0;
   padding: 0;
