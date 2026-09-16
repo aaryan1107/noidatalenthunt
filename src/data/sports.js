@@ -1,12 +1,25 @@
+export const NTH_S2 = Object.freeze({
+  id: "october-2026",
+  sessionName: "October 2026",
+  displayName: "Noida Talent Hunt S2",
+  dates: "31 October & 1 November 2026",
+  startDate: "2026-10-31",
+  endDate: "2026-11-01",
+});
+
 export const SPORTS = {
   "badminton": {
     "title": "Badminton",
     "arena": "Noida Sports Talent Hunt",
-    "dates": "Tentative - October 2026 (exact dates to be confirmed)",
-    "venue": "Noida — venue and reporting details to be confirmed",
+    "dates": NTH_S2.dates,
+    "seo": {
+      "ogImage": "/archive/badminton-wide.webp",
+      "description": "Badminton categories, eligibility and registration details for Noida Talent Hunt S2 in Noida.",
+    },
+    "venue": "Prometheus School, Noida",
     "fee": "₹100 per selected event/category",
     "whatsapp": "https://chat.whatsapp.com/LvkKAFZqC9FETVISdKyyag?s=cl&p=i&ilr=4&amv=0",
-    "intro": "Badminton registrations are open for the October 2026 Noida Sports Talent Hunt edition. Exact schedule, reporting time and eligibility checks will be confirmed by the organising team.",
+    "intro": "Badminton registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
     "rules": [
       "Feather shuttlecocks will be used for all categories.",
       "Match format: Best of 3 games of 15 points.",
@@ -95,11 +108,15 @@ export const SPORTS = {
   "table-tennis": {
     "title": "Table Tennis",
     "arena": "Noida Sports Talent Hunt",
-    "dates": "Tentative - October 2026 (exact dates to be confirmed)",
-    "venue": "Noida — venue and reporting details to be confirmed",
+    "dates": NTH_S2.dates,
+    "seo": {
+      "ogImage": "/archive/founder-vision-poster.jpg",
+      "description": "Table Tennis categories, eligibility and registration details for Noida Talent Hunt S2 in Noida.",
+    },
+    "venue": "Prometheus School, Noida",
     "fee": "₹100 per selected event/category",
     "whatsapp": "https://chat.whatsapp.com/LoCHtJnmasOKvQBwjjjeOl",
-    "intro": "Table Tennis registrations are open for the October 2026 Noida Sports Talent Hunt edition. Exact schedule, reporting time and eligibility checks will be confirmed by the organising team.",
+    "intro": "Table Tennis registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
     "rules": [
       "Please select at most 2 event/category options.",
       "Age eligibility must match the selected category.",
@@ -171,11 +188,15 @@ export const SPORTS = {
   "chess": {
     "title": "Chess",
     "arena": "Noida Sports Talent Hunt",
-    "dates": "Tentative - October 2026 (exact dates to be confirmed)",
-    "venue": "Noida — venue and reporting details to be confirmed",
+    "dates": NTH_S2.dates,
+    "seo": {
+      "ogImage": "/archive/chess-wide.webp",
+      "description": "Chess categories, eligibility and registration details for Noida Talent Hunt S2 in Noida.",
+    },
+    "venue": "Prometheus School, Noida",
     "fee": "₹100 per selected event/category",
     "whatsapp": "https://chat.whatsapp.com/Fkp0QDQfe8mKj4ISLhhPFA",
-    "intro": "Chess registrations are open for the October 2026 Noida Sports Talent Hunt edition. Exact schedule, reporting time and eligibility checks will be confirmed by the organising team.",
+    "intro": "Chess registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
     "rules": [
       "Select at most 3 age-category options.",
       "Category eligibility is based on the date of birth cut-off mentioned for each age group.",
@@ -195,14 +216,14 @@ export const SPORTS = {
         "label": "Select Chess Age Category (max 3) - ₹100 each",
         "max": 3,
         "options": [
-          "Under-11 (Born on or after 01/01/2015) - Day 1",
-          "Under-13 (Born on or after 01/01/2013) - Day 1",
-          "Under-15 (Born on or after 01/01/2011) - Day 1",
-          "Under-6 (Born on or after 01/01/2020) - Day 2",
-          "Under-8 (Born on or after 01/01/2018) - Day 2",
-          "Under-5 (Born on or after 01/01/2021) - Day 3",
-          "Under-7 (Born on or after 01/01/2019) - Day 3",
-          "Under-12 (Born on or after 01/01/2014) - Day 3"
+          "Under-11 (Born on or after 01/01/2015) - 31 October",
+          "Under-13 (Born on or after 01/01/2013) - 31 October",
+          "Under-15 (Born on or after 01/01/2011) - 31 October",
+          "Under-6 (Born on or after 01/01/2020) - 1 November",
+          "Under-8 (Born on or after 01/01/2018) - 1 November",
+          "Under-5 (Born on or after 01/01/2021) - 1 November",
+          "Under-7 (Born on or after 01/01/2019) - 1 November",
+          "Under-12 (Born on or after 01/01/2014) - 1 November"
         ]
       },
       {
@@ -253,11 +274,15 @@ export const SPORTS = {
   "swimming": {
     "title": "Swimming",
     "arena": "Noida Sports Talent Hunt",
-    "dates": "Tentative - October 2026 (exact dates to be confirmed)",
-    "venue": "Noida — venue and reporting details to be confirmed",
+    "dates": NTH_S2.dates,
+    "seo": {
+      "ogImage": "/archive/swimming-wide.webp",
+      "description": "Swimming categories, eligibility and registration details for Noida Talent Hunt S2 in Noida.",
+    },
+    "venue": "Prometheus School, Noida",
     "fee": "₹100 per selected event/category",
     "whatsapp": "https://chat.whatsapp.com/FrGiHtzSbzb0b0iRZwUnAJ?s=hd&p=i&mlu=2&ilr=0",
-    "intro": "Swimming registrations are open for the October 2026 Noida Sports Talent Hunt edition. Exact schedule, reporting time and eligibility checks will be confirmed by the organising team.",
+    "intro": "Swimming registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
     "rules": [
       "FINA / World Aquatics rules will be followed strictly.",
       "Swimmers can participate in 2 individual events plus IM: total 3 events.",
@@ -341,11 +366,15 @@ export const SPORTS = {
   "gymnastics": {
     "title": "Gymnastics",
     "arena": "Noida Sports Talent Hunt",
-    "dates": "Tentative - October 2026 (exact dates to be confirmed)",
-    "venue": "Noida — venue and reporting details to be confirmed",
+    "dates": NTH_S2.dates,
+    "seo": {
+      "ogImage": "/archive/gymnastics-jump.webp",
+      "description": "Gymnastics categories, eligibility and registration details for Noida Talent Hunt S2 in Noida.",
+    },
+    "venue": "Prometheus School, Noida",
     "fee": "₹100 per selected event/category",
     "whatsapp": "https://chat.whatsapp.com/DE4j2DvqIezAtmyIMsdfv4",
-    "intro": "Gymnastics registrations are open for the October 2026 Noida Sports Talent Hunt edition. Exact schedule, reporting time and eligibility checks will be confirmed by the organising team.",
+    "intro": "Gymnastics registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
     "rules": [
       "All performances will be evaluated as per the FIG Code of Points.",
       "A modified element list will apply for gymnasts aged 6-12 years.",
@@ -416,11 +445,15 @@ export const SPORTS = {
   "shooting": {
     "title": "Shooting",
     "arena": "Noida Sports Talent Hunt",
-    "dates": "Tentative - October 2026 (exact dates to be confirmed)",
-    "venue": "Noida — venue and reporting details to be confirmed",
+    "dates": NTH_S2.dates,
+    "seo": {
+      "ogImage": "/archive/shooting-wide.webp",
+      "description": "Shooting categories, eligibility and registration details for Noida Talent Hunt S2 in Noida.",
+    },
+    "venue": "Prometheus School, Noida",
     "fee": "₹100 per selected event/category",
     "whatsapp": "https://chat.whatsapp.com/CwIUIy8UDko9t9zCOE6MoA?s=cl&p=i&ilr=4&amv=0",
-    "intro": "Shooting registrations are open for the October 2026 Noida Sports Talent Hunt edition. Exact schedule, reporting time and eligibility checks will be confirmed by the organising team.",
+    "intro": "Shooting registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
     "rules": [
       "All matches will be conducted as per NRAI rulebook.",
       "All COC will be conducted mixed (Man/Woman).",

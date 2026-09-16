@@ -4,7 +4,9 @@ import OpportunitySplit from "./components/OpportunitySplit";
 import ArchiveSequence from "./components/ArchiveSequence";
 import Preloader from "./components/Preloader";
 import Grainient from "./components/Grainient";
-import { SPORTS, SPORT_ORDER } from "./data/sports";
+import { NTH_S2, SPORTS, SPORT_ORDER } from "./data/sports";
+import { CONTACT } from "./data/contact";
+import WhatsAppButton from "./components/WhatsAppButton";
 import { useSiteMotion } from "./useSiteMotion";
 import nthFavicon from "../NTH FAVICON.png";
 
@@ -106,6 +108,7 @@ function Navigation({ menuOpen, setMenuOpen }) {
           <a href="#gallery">Gallery</a>
           <a href="#sports">Sports</a>
           <a href="#pathway">Opportunity</a>
+          <a href="/contact/">Contact</a>
         </div>
         <a className="nav-register" href="#sports">
           Register
@@ -129,6 +132,7 @@ function Navigation({ menuOpen, setMenuOpen }) {
           ["Gallery", "#gallery"],
           ["Sports", "#sports"],
           ["Opportunity", "#pathway"],
+          ["Contact", "/contact/"],
           ["Register", "#sports"],
         ].map(([label, href], index) => (
           <a href={href} onClick={close} style={{ "--menu-delay": `${index * 40}ms` }} key={label}>
@@ -167,7 +171,7 @@ function Hero() {
           <ActionLink href="#sports">Choose your sport</ActionLink>
         </div>
         <div className="hero-chips hero-support">
-          <span className="hero-chip"><strong>OCT</strong> Registrations open · dates tentative</span>
+          <span className="hero-chip"><strong>31 OCT</strong> &amp; 1 NOV · registrations open</span>
           <span className="hero-chip"><strong>6</strong> sports on the October floor</span>
           <span className="hero-chip"><strong>₹100</strong> per selected event</span>
         </div>
@@ -233,25 +237,27 @@ function SportGlyph({ slug }) {
   return <svg className="sport-glyph" viewBox="0 0 96 88" aria-hidden="true">{paths[slug]}</svg>;
 }
 
-function SportsGrid({ selectSport }) {
+function SportsGrid({ selectSport, availability }) {
   return (
     <section className="sports-section" id="sports">
       <div className="section-frame">
         <div className="section-heading">
           <span className="eyebrow">October line-up</span>
           <h2>Pick the arena that feels like yours.</h2>
-          <p>Every registration is ₹100 per selected event or category. Dates begin in October and remain tentative until the final schedule is released.</p>
+          <p>Every registration is ₹100 per selected event or category. Noida Talent Hunt S2 takes place on {NTH_S2.dates}.</p>
         </div>
         <div className="sports-grid">
           {SPORT_ORDER.map((slug, index) => {
             const sport = SPORTS[slug];
+            const event = availability?.[slug];
+            const isOpen = event ? event.is_open : true;
             return (
               <div className={`sport-shell sport-${index + 1}`} key={slug}>
-                <button className="sport-card" type="button" onClick={() => selectSport(slug)}>
+                <button className="sport-card" type="button" onClick={() => selectSport(slug)} disabled={!isOpen}>
                   <span className="sport-index">0{index + 1}</span>
                   <SportGlyph slug={slug} />
                   <span className="sport-name">{sport.title}</span>
-                  <span className="sport-meta">October · ₹100</span>
+                  <span className="sport-meta">{isOpen ? `Open · ${NTH_S2.dates} · ₹100` : "Registrations closed"}</span>
                   <span className="sport-arrow"><Arrow diagonal /></span>
                 </button>
               </div>
@@ -356,7 +362,7 @@ function RegistrationConfirmed({ onboarding, registrationId, onClose }) {
       <span className="eyebrow">Payment verified</span>
       <h3>You’re in. Two things left.</h3>
       <p>
-        Your {onboarding.sport} registration for October 2026 is confirmed and saved. Reference{" "}
+        Your {onboarding.sport} registration for {NTH_S2.sessionName} ({NTH_S2.dates}) is confirmed and saved. Reference{" "}
         <code>{String(registrationId || "").slice(0, 8)}</code>.
       </p>
 
@@ -582,7 +588,7 @@ function Registration({ slug, onClose }) {
             <p>{sport.intro}</p>
             <dl>
               <div><dt>Dates</dt><dd>{sport.dates}</dd></div>
-              <div><dt>Venue</dt><dd>{sport.venue}</dd></div>
+              <div><dt>Venue</dt><dd><a href="/contact/#venue">{sport.venue}</a></dd></div>
               <div><dt>Fee</dt><dd>{sport.fee}</dd></div>
             </dl>
             <div className="rules-block">
@@ -694,13 +700,14 @@ function Footer() {
         </div>
         <div className="footer-meta">
           <p>Presented by Gauri Shiksha Foundation · in association with Prometheus School</p>
-          <a href="/organiser.html">Organiser portal</a>
-          <a href="mailto:info@gaurishiksha.com">info@gaurishiksha.com</a>
-          <a href="tel:+919953659468">+91 99536 59468</a>
+          <a href="/contact/#venue">Prometheus School, Noida</a>
+          <a href="/contact/">Contact the NTH team</a>
+          <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+          <a href={`tel:${CONTACT.phoneHref}`}>{CONTACT.phoneDisplay}</a>
           <a href="https://www.instagram.com/prometheussportsacademy/" target="_blank" rel="noreferrer">
             @prometheussportsacademy
           </a>
-          <span>October 2026 · Dates tentative</span>
+          <span>{NTH_S2.dates}</span>
         </div>
       </div>
     </footer>
@@ -711,6 +718,7 @@ export default function App() {
   const rootRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedSport, setSelectedSport] = useState(null);
+  const [availability, setAvailability] = useState(null);
   const [ready, setReady] = useState(false);
   const sport = useMemo(() => selectedSport && SPORTS[selectedSport], [selectedSport]);
   useSiteMotion(rootRef, ready);
@@ -730,6 +738,18 @@ export default function App() {
     if (match && SPORTS[match[1]]) setSelectedSport(match[1]);
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    fetch("/api/registration-status", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((payload) => {
+        if (!active || !payload?.success) return;
+        setAvailability(Object.fromEntries(payload.events.map((event) => [event.category_slug, event])));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
   return (
     <div className="site-root" ref={rootRef}>
       {!ready && <Preloader onDone={() => setReady(true)} />}
@@ -738,12 +758,13 @@ export default function App() {
         <Hero />
         <JulyEdition />
         <ArchiveSequence />
-        <SportsGrid selectSport={selectSport} />
+        <SportsGrid selectSport={selectSport} availability={availability} />
         <OpportunitySplit />
         {sport && <Registration slug={selectedSport} onClose={() => { setSelectedSport(null); window.history.replaceState(null, "", "#sports"); }} />}
         <ClosingQuote />
       </main>
       <Footer />
+      <WhatsAppButton />
     </div>
   );
 }

@@ -719,6 +719,11 @@ footer h2 {
   transition-timing-function: var(--ease-out);
 }
 
+.sport-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
 .sport-index {
   font-size: 10px;
   font-weight: 800;
@@ -1173,16 +1178,16 @@ sup {
     transform: translate3d(3px, 0, 0) scale(1.04);
   }
 
-  .sport-card:hover {
+  .sport-card:not(:disabled):hover {
     background: #fbfcf8;
     transform: translate3d(0, -3px, 0);
   }
 
-  .sport-card:hover .sport-arrow {
+  .sport-card:not(:disabled):hover .sport-arrow {
     transform: translate3d(6px, -2px, 0);
   }
 
-  .sport-card:hover .sport-name::after {
+  .sport-card:not(:disabled):hover .sport-name::after {
     transform: scaleX(1);
     transform-origin: left;
   }
@@ -1624,6 +1629,67 @@ footer h2 {
 }
 
 .confirm-contacts a:hover { text-decoration: underline; }
+
+.registration-summary dd a {
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(44, 46, 42, 0.35);
+}
+
+.whatsapp-float {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #25d366;
+  color: white;
+  box-shadow: 0 18px 42px -12px rgba(37, 211, 102, 0.75);
+  transition: padding 260ms var(--ease-out), transform 180ms var(--ease-out);
+}
+
+.whatsapp-float:hover { padding-right: 19px; transform: translateY(-2px); }
+.whatsapp-float svg { width: 23px; height: 23px; flex: 0 0 23px; fill: currentColor; }
+.whatsapp-float span { width: 0; overflow: hidden; white-space: nowrap; font-size: 12px; font-weight: 800; transition: width 260ms var(--ease-out), margin 260ms var(--ease-out); }
+.whatsapp-float:hover span { width: 88px; margin-left: 9px; }
+
+.contact-page { min-height: 100vh; background: var(--cream); color: var(--ink); }
+.contact-nav { display: flex; align-items: center; justify-content: space-between; width: min(1240px, calc(100% - 48px)); margin: 0 auto; padding: 24px 0; border-bottom: 1px solid rgba(44, 46, 42, 0.14); font-size: 12px; font-weight: 800; }
+.contact-nav > a:last-child { display: inline-flex; gap: 8px; align-items: center; padding: 11px 15px; border-radius: 99px; background: var(--ink); color: var(--cream); text-decoration: none; }
+.contact-brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; text-decoration: none; }
+.contact-brand-mark { display: block; width: 38px; height: 38px; object-fit: contain; }
+.contact-hero { width: min(1240px, calc(100% - 48px)); margin: 0 auto; padding: clamp(76px, 12vw, 160px) 0 clamp(58px, 8vw, 100px); }
+.contact-hero h1 { max-width: 940px; margin: 0; font-size: clamp(48px, 8vw, 114px); letter-spacing: -.085em; line-height: .88; }
+.contact-hero p { max-width: 600px; margin: 34px 0 0; color: #566057; font-size: clamp(16px, 2vw, 21px); line-height: 1.6; }
+.contact-content { display: grid; grid-template-columns: minmax(290px, .78fr) minmax(0, 1.22fr); gap: clamp(26px, 5vw, 86px); width: min(1240px, calc(100% - 48px)); margin: 0 auto; padding: 0 0 clamp(90px, 12vw, 160px); }
+.contact-details { display: flex; flex-direction: column; gap: 10px; }
+.contact-card { display: grid; grid-template-columns: 1fr auto; gap: 6px 18px; padding: 18px; border: 1px solid rgba(44, 46, 42, 0.14); background: rgba(255, 255, 255, .34); text-decoration: none; transition: background 180ms var(--ease-out), transform 180ms var(--ease-out); }
+.contact-card:hover { background: white; transform: translateY(-2px); }
+.contact-card span:first-child { grid-column: 1; color: var(--green-deep); font-size: 10px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.contact-card strong { grid-column: 1; font-size: 14px; line-height: 1.35; }
+.contact-card > span:last-child { grid-column: 2; grid-row: 1 / 3; align-self: center; font-size: 20px; }
+.contact-instagram { margin: 10px 2px 0; color: var(--green-deep); font-size: 12px; font-weight: 800; text-underline-offset: 4px; }
+.contact-form-panel { padding: clamp(24px, 5vw, 58px); background: var(--paper); border: 1px solid rgba(44, 46, 42, .14); box-shadow: 20px 25px 0 rgba(109, 210, 67, .13); }
+.contact-form-panel h2 { max-width: 500px; margin: 0 0 34px; font-size: clamp(32px, 4.4vw, 58px); letter-spacing: -.07em; line-height: .94; }
+.contact-form-panel form { display: grid; gap: 18px; }
+.contact-form-panel label { display: grid; gap: 8px; color: #4b554c; font-size: 11px; font-weight: 800; letter-spacing: .04em; }
+.contact-form-panel input, .contact-form-panel textarea { width: 100%; padding: 14px 0; border: 0; border-bottom: 1px solid rgba(44, 46, 42, .2); outline: none; background: transparent; color: var(--ink); font-size: 15px; resize: vertical; }
+.contact-form-panel input:focus, .contact-form-panel textarea:focus { border-color: var(--green-deep); }
+.contact-form-panel button, .contact-sent button { width: fit-content; margin-top: 8px; padding: 14px 18px; border: 0; background: var(--green-deep); color: white; font-weight: 800; cursor: pointer; }
+.contact-sent { min-height: 355px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }.contact-sent > span { color: var(--green-deep); font-size: 10px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }.contact-sent h2 { margin: 17px 0 12px; }.contact-sent p { margin: 0; color: var(--muted); }
+.venue-section { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.2fr); min-height: 560px; background: var(--ink); color: var(--cream); }
+.venue-copy { display: flex; flex-direction: column; justify-content: center; padding: clamp(40px, 7vw, 112px); }.venue-copy .eyebrow { color: var(--green); }.venue-copy h2 { max-width: 440px; margin: 0; font-size: clamp(42px, 5vw, 74px); letter-spacing: -.08em; line-height: .91; }.venue-copy p { max-width: 360px; margin: 24px 0 0; color: rgba(245, 241, 228, .65); line-height: 1.6; }.venue-copy a { display: inline-flex; gap: 9px; width: fit-content; margin-top: 32px; color: var(--green); font-size: 12px; font-weight: 800; text-underline-offset: 5px; }
+.venue-map { min-height: 420px; padding: 14px; background: rgba(245, 241, 228, .08); }.venue-map iframe { width: 100%; height: 100%; min-height: 420px; border: 0; filter: grayscale(1) contrast(.88); transition: filter 280ms var(--ease-out); }.venue-map:hover iframe { filter: none; }
+.contact-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px; background: var(--yellow); color: var(--ink); font-size: 11px; font-weight: 800; }.contact-footer a { text-underline-offset: 4px; }
+
+@media (max-width: 780px) {
+  .contact-nav, .contact-hero, .contact-content { width: min(100% - 32px, 620px); }
+  .contact-hero { padding-top: 72px; }.contact-content, .venue-section { grid-template-columns: 1fr; }.contact-content { padding-bottom: 90px; }.contact-form-panel { box-shadow: 10px 12px 0 rgba(109, 210, 67, .13); }.venue-section { min-height: auto; }.venue-copy { min-height: 430px; }.contact-footer { flex-wrap: wrap; }.whatsapp-float { right: 16px; bottom: 16px; }.whatsapp-float span { display: none; }
+}
 
 .confirm-close {
   margin: 26px 0 0;

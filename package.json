@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/generate-sport-pages.mjs",
     "preview": "vite preview",
     "pages:dev": "npm run build && wrangler pages dev dist --compatibility-date=2026-06-24",
     "deploy": "npm run build && wrangler pages deploy dist --project-name=noidatalenthunt"

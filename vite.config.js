@@ -12,6 +12,7 @@ export default defineConfig({
       input: {
         main: path.resolve(root, "index.html"),
         organiser: path.resolve(root, "organiser.html"),
+        contact: path.resolve(root, "contact/index.html"),
       },
     },
   },

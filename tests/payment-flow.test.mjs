@@ -4,18 +4,22 @@ import { onRequestPost as createOrder } from "../functions/api/create-order.js";
 import { onRequestPost as verifyPayment } from "../functions/api/verify-payment.js";
 import { onRequestPost as razorpayWebhook } from "../functions/api/razorpay-webhook.js";
 import { csvEscape } from "../functions/api/_organiser-auth.js";
+import { onRequestGet as registrationStatus } from "../functions/api/registration-status.js";
+import { onRequestPatch as updateAvailability } from "../functions/api/organiser-availability.js";
 
 const env = {
   RAZORPAY_KEY_ID: "rzp_test_local",
   RAZORPAY_KEY_SECRET: "local-secret",
   RAZORPAY_WEBHOOK_SECRET: "local-webhook-secret",
   SUPABASE_URL: "https://supabase.example.test",
-  SUPABASE_SERVICE_ROLE_KEY: "local-service-role"
+  SUPABASE_SERVICE_ROLE_KEY: "local-service-role",
+  ORGANISER_PORTAL_PASSWORD: "local-organiser-password",
+  ORGANISER_PORTAL_SESSION_SECRET: "local-organiser-session-secret",
 };
 
-function context(path, body, headers = {}) {
+function context(path, body, headers = {}, contextEnv = env) {
   return {
-    env,
+    env: contextEnv,
     request: new Request(`https://example.test/api/${path}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...headers },
@@ -128,4 +132,49 @@ test("CSV exports render user-provided formula prefixes as literal text", () => 
     assert.match(csvEscape(value), /^'/);
   }
   assert.equal(csvEscape("Aaryan, Noida"), '"Aaryan, Noida"');
+});
+
+test("availability is uncached and creates no order when a live sport is closed", async () => {
+  const response = await registrationStatus({ env, request: new Request("https://example.test/api/registration-status") });
+  assert.equal(response.headers.get("Cache-Control"), "no-store, max-age=0, must-revalidate");
+  assert.equal((await response.json()).events.find((event) => event.category_slug === "chess").is_open, true);
+
+  const dynamicEnv = { ...env, ENABLE_DYNAMIC_AVAILABILITY: "true" };
+  await withFetch(async (url) => {
+    assert.match(String(url), /registration_event_availability/);
+    return Response.json([{ category_slug: "chess", is_open: false, slots_available: 0 }]);
+  }, async () => {
+    const closed = await createOrder(context("create-order", {
+      participant_name: "Local Test", event: "Chess", category_slug: "chess",
+      address: "Noida", contact: "9876543210", cart_items: [{ label: "Under-11" }]
+    }, {}, dynamicEnv));
+    assert.equal(closed.status, 409);
+    assert.match((await closed.json()).error, /closed/);
+  });
+});
+
+test("availability changes require an organiser session and update only an approved sport", async () => {
+  const unauthorised = await updateAvailability(context("organiser-availability", {
+    category_slug: "chess", is_open: false, slots_available: 0,
+  }));
+  assert.equal(unauthorised.status, 401);
+
+  const expires = Math.floor(Date.now() / 1000) + 3600;
+  const nonce = "localnonce";
+  const signature = await signed(`${expires}.${nonce}`, env.ORGANISER_PORTAL_SESSION_SECRET);
+  let patch;
+  await withFetch(async (url, options = {}) => {
+    assert.match(String(url), /registration_event_availability/);
+    assert.equal(options.method, "PATCH");
+    patch = JSON.parse(options.body);
+    return Response.json([{ category_slug: "chess", ...patch }]);
+  }, async () => {
+    const response = await updateAvailability(context("organiser-availability", {
+      category_slug: "chess", is_open: false, slots_available: 0,
+    }, { Cookie: `nth_organiser_session=${expires}.${nonce}.${signature}` }));
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).success, true);
+  });
+  assert.equal(patch.is_open, false);
+  assert.equal(patch.slots_available, 0);
 });

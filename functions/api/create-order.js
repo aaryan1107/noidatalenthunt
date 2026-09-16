@@ -1,14 +1,9 @@
+import { eventIsOpen, getRegistrationAvailability } from "./_registration-availability.js";
+import { NTH_S2 } from "../../src/data/sports.js";
+
 const PRICE_PER_ITEM = 10000; // Rs. 100 in paise
 const REGISTRATION_TABLE = "registrations_october_2026";
-const REGISTRATION_SESSION = "October 2026";
-const OPEN_SPORTS_EVENTS = new Set([
-  "badminton",
-  "table-tennis",
-  "chess",
-  "swimming",
-  "gymnastics",
-  "shooting"
-]);
+const REGISTRATION_SESSION = NTH_S2.sessionName;
 const TRACKING_COLUMNS = [
   "id",
   "session_name",
@@ -68,11 +63,19 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    if (!OPEN_SPORTS_EVENTS.has(categorySlug)) {
+    const availability = await getRegistrationAvailability(env);
+    if (!availability.ok) {
       return jsonResponse({
         success: false,
-        error: "Only sports registrations are open for the October 2026 session."
-      }, 400);
+        error: "Registration availability is temporarily unavailable. Please try again shortly."
+      }, 503);
+    }
+
+    if (!eventIsOpen(availability.events, categorySlug)) {
+      return jsonResponse({
+        success: false,
+        error: "This registration is currently closed."
+      }, 409);
     }
 
     const mobileNumber = normalizeMobileNumber(body.contact);

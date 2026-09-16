@@ -1,7 +1,8 @@
 import { onboardingFor } from "./_sport-onboarding.js";
+import { NTH_S2 } from "../../src/data/sports.js";
 
 const REGISTRATION_TABLE = "registrations_october_2026";
-const REGISTRATION_SESSION = "October 2026";
+const REGISTRATION_SESSION = NTH_S2.sessionName;
 
 export async function onRequestPost(context) {
   const { request, env } = context;
