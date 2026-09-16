@@ -38,6 +38,70 @@ const GALLERY_ITEMS = [
 
 const THEATRE_POST_ID = "Dao2439PcVd";
 
+function FounderVision() {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      section.classList.add("is-visible");
+      observer.disconnect();
+    }, { threshold: 0 });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section className="founder-vision" id="why" ref={sectionRef}>
+      <div className="founder-vision-wrap">
+        <aside className="founder-portrait-column">
+          <div className="founder-portrait-stage">
+            <img src="/archive/mukesh-sharma-founder.png" alt="Mukesh Sharma, Chairperson of Prometheus School" />
+          </div>
+          <div className="founder-thought">
+            <svg className="founder-thought-thread" viewBox="0 0 118 86" aria-hidden="true">
+              <path d="M17 3C28 37 82 34 102 82" />
+              <circle cx="17" cy="3" r="2.5" />
+            </svg>
+            <strong>Noida’s next Olympian could be closer than you think.</strong>
+            <span>Give them the stage.</span>
+          </div>
+        </aside>
+        <div className="founder-vision-content">
+          <div className="founder-why-copy">
+            <span className="eyebrow">Founder’s vision</span>
+            <blockquote className="founder-quote-card">
+              <h2>India’s champions came from somewhere.</h2>
+              <cite className="founder-quote-attribution">Mukesh Sharma · Chairperson, Prometheus School</cite>
+            </blockquote>
+            <p className="founder-why-lead">Every Olympic medal, every standing ovation, every World Championship — it started with a child who got a chance.</p>
+            <p>Noida has over 6 lakh families. Our children are brilliant, driven, and full of potential. What they have lacked is one unified, professional platform. <strong>Noida Talent Hunt is that platform</strong> — in association with Prometheus School.</p>
+          </div>
+          <div className="founder-champion-grid" aria-label="Athletes who started on local stages">
+            <article className="founder-champion founder-champion-featured">
+              <span>Badminton · Paris 2024 Olympian</span>
+              <h3>Lakshya Sen</h3>
+              <p>BWF World No. 12 · World Championships bronze · Commonwealth Games gold · Started training at age 8 in Almora</p>
+            </article>
+            <article className="founder-champion">
+              <span>Cricket</span>
+              <h3>Virat Kohli</h3>
+              <p>First spotted playing in Delhi’s local circuits at age 9</p>
+            </article>
+            <article className="founder-champion">
+              <span>Shooting · Olympic medallist</span>
+              <h3>Manu Bhaker</h3>
+              <p>Paris 2024 double medallist · First pistol at 14 in Jhajjar</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function InstagramLightbox({ item, onClose }) {
   const panelRef = useRef(null);
 
@@ -110,7 +174,7 @@ function InstagramLightbox({ item, onClose }) {
 }
 
 export default function ArchiveSequence() {
-  const rootRef = useRef(null);
+  const theatreRef = useRef(null);
   const videoRef = useRef(null);
   const [active, setActive] = useState(null);
   const [theatreReady, setTheatreReady] = useState(false);
@@ -129,8 +193,8 @@ export default function ArchiveSequence() {
   };
 
   useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return undefined;
+    const theatre = theatreRef.current;
+    if (!theatre) return undefined;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -140,7 +204,7 @@ export default function ArchiveSequence() {
       },
       { rootMargin: "600px 0px" },
     );
-    observer.observe(root);
+    observer.observe(theatre);
     return () => observer.disconnect();
   }, []);
 
@@ -167,45 +231,41 @@ export default function ArchiveSequence() {
   }, [theatreReady]);
 
   useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root) return undefined;
+    const theatre = theatreRef.current;
+    if (!theatre) return undefined;
     const media = gsap.matchMedia();
 
-    const context = gsap.context(() => {
-      media.add("(min-width: 901px) and (prefers-reduced-motion: no-preference)", () => {
-        const timeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: root,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 0.7,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        timeline
-          .to(".archive-gallery-layer", { scale: 0.82, yPercent: -6, autoAlpha: 0, ease: "power2.inOut" }, 0.42)
-          .fromTo(
-            ".archive-theatre-layer",
-            { scale: 0.62, autoAlpha: 0, yPercent: 8 },
-            { scale: 1, autoAlpha: 1, yPercent: 0, ease: "power3.out" },
-            0.46,
-          )
-          .fromTo(
-            ".archive-stage-veil",
-            { autoAlpha: 0 },
-            { autoAlpha: 1, ease: "none" },
-            0.42,
-          );
-
-        return () => timeline.kill();
+    media.add("(min-width: 901px) and (prefers-reduced-motion: no-preference)", () => {
+      const layer = theatre.querySelector(".archive-theatre-layer");
+      const veil = theatre.querySelector(".archive-stage-veil");
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: theatre,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.7,
+          invalidateOnRefresh: true,
+        },
       });
-    }, root);
 
-    return () => {
-      media.revert();
-      context.revert();
-    };
+      timeline
+        .fromTo(
+          layer,
+          { scale: 0.62, autoAlpha: 0, yPercent: 8 },
+          { scale: 1, autoAlpha: 1, yPercent: 0, ease: "power3.out" },
+          0,
+        )
+        .fromTo(
+          veil,
+          { autoAlpha: 0 },
+          { autoAlpha: 1, ease: "none" },
+          0,
+        );
+
+      return () => timeline.kill();
+    });
+
+    return () => media.revert();
   }, []);
 
   const onSelect = (item) => {
@@ -214,10 +274,8 @@ export default function ArchiveSequence() {
 
   return (
     <>
-      <section className="archive-sequence" id="gallery" ref={rootRef}>
-        <div className="archive-sticky">
-          <div className="archive-stage-veil" aria-hidden="true" />
-
+      <section className="archive-sequence" id="gallery">
+        <div className="archive-gallery-shell">
           <div className="archive-gallery-layer">
             <div className="archive-layer-head">
               <span className="eyebrow">The July 2026 floor</span>
@@ -231,11 +289,21 @@ export default function ArchiveSequence() {
               <FisheyeInfiniteGrid items={GALLERY_ITEMS} onSelect={onSelect} />
             </div>
           </div>
+        </div>
+      </section>
 
+      <FounderVision />
+
+      <section className="archive-theatre-section" ref={theatreRef}>
+        <div className="archive-sticky">
+          <div className="archive-stage-veil" aria-hidden="true" />
           <div className="archive-theatre-layer">
             <div className="archive-theatre-copy">
-              <span className="eyebrow">Why this exists</span>
-              <h2>The goal behind Noida Talent Hunt 2026.</h2>
+              <span className="eyebrow">The vision in motion</span>
+              <h2>Why Noida Talent Hunt exists.</h2>
+              <p>
+                A founder’s note on the stage we are building for the next generation.
+              </p>
             </div>
             <div className="archive-theatre-frame">
               <video

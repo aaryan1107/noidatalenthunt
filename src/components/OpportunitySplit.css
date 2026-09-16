@@ -1,6 +1,6 @@
 .opportunity-split {
   position: relative;
-  min-height: 320vh;
+  min-height: 205vh;
   background: var(--ink);
   color: var(--paper);
 }

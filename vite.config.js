@@ -7,6 +7,14 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(root, "index.html"),
+        organiser: path.resolve(root, "organiser.html"),
+      },
+    },
+  },
   resolve: {
     alias: { "@": path.resolve(root, "src") },
   },

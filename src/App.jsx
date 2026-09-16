@@ -694,6 +694,7 @@ function Footer() {
         </div>
         <div className="footer-meta">
           <p>Presented by Gauri Shiksha Foundation · in association with Prometheus School</p>
+          <a href="/organiser.html">Organiser portal</a>
           <a href="mailto:info@gaurishiksha.com">info@gaurishiksha.com</a>
           <a href="tel:+919953659468">+91 99536 59468</a>
           <a href="https://www.instagram.com/prometheussportsacademy/" target="_blank" rel="noreferrer">

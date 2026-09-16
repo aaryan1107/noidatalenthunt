@@ -187,13 +187,11 @@ export async function onRequestPost(context) {
     const insertText = await insertRes.text();
 
     if (!insertRes.ok) {
+      console.error("Registration tracking insert failed", { status: insertRes.status, registrationId, orderId: order.id, details: insertText });
       return jsonResponse({
         success: false,
         error: "Razorpay order created, but pending registration tracking failed.",
-        details: insertText,
-        supabase_status: insertRes.status,
-        order_id: order.id,
-        registration_id: registrationId
+        reference: registrationId
       }, 500);
     }
 
