@@ -275,7 +275,7 @@ export default function ArchiveSequence() {
   return (
     <>
       <section className="archive-sequence" id="gallery">
-        <div className="archive-gallery-shell">
+        <div className="archive-sticky">
           <div className="archive-gallery-layer">
             <div className="archive-layer-head">
               <span className="eyebrow">The July 2026 floor</span>

@@ -251,7 +251,7 @@
 /* Desktop: one pinned stage where the gallery hands off to the theatre on scroll. */
 @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
   .archive-sequence {
-    height: 360vh;
+    height: 165vh;
   }
 
   .archive-sticky {
@@ -322,23 +322,37 @@
 
 /* Gallery, founder section and theatre are intentionally separate moments. */
 .archive-sequence {
-  height: auto;
-  padding: clamp(74px, 9vw, 118px) 4vw;
+  padding: 0;
 }
 
-.archive-gallery-shell {
-  width: min(1240px, 100%);
-  margin: 0 auto;
+.archive-sequence .archive-sticky {
+  padding: 0;
 }
 
 .archive-sequence .archive-gallery-layer {
-  position: relative;
-  inset: auto;
-  min-height: min(780px, 78vh);
+  inset: 0;
+  gap: 0;
+}
+
+.archive-sequence .archive-layer-head {
+  width: 100%;
+  max-width: none;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  padding: clamp(42px, 5vw, 72px) 4vw clamp(28px, 3vw, 42px);
+  background: #101210;
+}
+
+.archive-sequence .archive-layer-head p {
+  max-width: 62ch;
 }
 
 .archive-sequence .archive-stage {
   min-height: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
 }
 
 .founder-vision {
@@ -571,9 +585,6 @@
 }
 
 @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
-  .archive-sequence { height: auto; }
-  .archive-sequence .archive-gallery-layer { position: relative; inset: auto; }
-
   .archive-theatre-section {
     height: 145vh;
   }
@@ -654,7 +665,7 @@
 }
 
 @media (max-width: 560px) {
-  .archive-sequence { padding-inline: 16px; }
+  .archive-sequence .archive-layer-head { padding: 38px 24px 28px; }
   .founder-portrait-stage { height: 500px; min-height: 0; }
   .founder-portrait-stage::before { inset: 10% 14% 0; }
   .founder-portrait-stage img { height: 112%; }
