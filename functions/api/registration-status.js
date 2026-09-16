@@ -1,4 +1,5 @@
 import { getRegistrationAvailability } from "./_registration-availability.js";
+import { withErrorStatus } from "./_http-errors.js";
 
 export async function onRequestGet(context) {
   const availability = await getRegistrationAvailability(context.env);
@@ -14,7 +15,7 @@ export function onRequestOptions() {
 }
 
 function response(data, status = 200) {
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(withErrorStatus(data, status)), {
     status,
     headers: {
       "Content-Type": "application/json",

@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { NTH_S2, SPORT_ORDER, SPORTS } from "../src/data/sports.js";
 
-const siteUrl = "https://noidatalenthunt.pages.dev";
+const siteUrl = "https://noidatalenthunt.gaurishiksha.com";
 const escape = (value) => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
 
 function page(slug, sport) {

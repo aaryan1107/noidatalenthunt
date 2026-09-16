@@ -1,3 +1,5 @@
+import { withErrorStatus } from "./_http-errors.js";
+
 const SESSION_COOKIE = "nth_organiser_session";
 const SESSION_TTL_SECONDS = 8 * 60 * 60;
 
@@ -75,7 +77,7 @@ function timingSafeEqual(a, b) {
 }
 
 export function jsonResponse(data, status = 200, headers = {}) {
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(withErrorStatus(data, status)), {
     status,
     headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...headers }
   });

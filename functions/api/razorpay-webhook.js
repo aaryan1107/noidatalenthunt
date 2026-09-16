@@ -1,3 +1,5 @@
+import { withErrorStatus } from "./_http-errors.js";
+
 const REGISTRATION_TABLE = "registrations_october_2026";
 
 export async function onRequestPost(context) {
@@ -37,7 +39,12 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    const event = JSON.parse(rawBody);
+    let event;
+    try {
+      event = JSON.parse(rawBody);
+    } catch {
+      return jsonResponse({ success: false, error: "Webhook body must be valid JSON." }, 400);
+    }
     const eventType = event.event;
     const payment = event.payload?.payment?.entity || null;
     const order = event.payload?.order?.entity || null;
@@ -275,7 +282,7 @@ export async function onRequestOptions() {
 }
 
 function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(withErrorStatus(data, status)), {
     status,
     headers: corsHeaders()
   });

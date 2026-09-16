@@ -107,8 +107,29 @@ test("invalid checkout signature is rejected without contacting payment or datab
       razorpay_payment_id: "pay_local", razorpay_signature: "invalid"
     }));
     assert.equal(response.status, 400);
-    assert.equal((await response.json()).success, false);
+    const body = await response.json();
+    assert.equal(body.success, false);
+    assert.equal(body.status, 400);
+    assert.equal(body.error_code, "BAD_REQUEST");
   });
+});
+
+test("malformed API request bodies return a documented 400 response", async () => {
+  for (const [handler, path] of [[createOrder, "create-order"], [verifyPayment, "verify-payment"]]) {
+    const response = await handler(context(path, "{not-json"));
+    const body = await response.json();
+    assert.equal(response.status, 400);
+    assert.equal(body.status, 400);
+    assert.equal(body.error_code, "BAD_REQUEST");
+  }
+
+  const rawWebhookBody = "{not-json";
+  const signature = await signed(rawWebhookBody, env.RAZORPAY_WEBHOOK_SECRET);
+  const webhookResponse = await razorpayWebhook(context("razorpay-webhook", rawWebhookBody, { "x-razorpay-signature": signature }));
+  const webhookBody = await webhookResponse.json();
+  assert.equal(webhookResponse.status, 400);
+  assert.equal(webhookBody.status, 400);
+  assert.equal(webhookBody.error_code, "BAD_REQUEST");
 });
 
 test("signed webhook rejects an amount mismatch without confirming the registration", async () => {
@@ -158,6 +179,7 @@ test("availability changes require an organiser session and update only an appro
     category_slug: "chess", is_open: false, slots_available: 0,
   }));
   assert.equal(unauthorised.status, 401);
+  assert.equal((await unauthorised.json()).error_code, "UNAUTHENTICATED");
 
   const expires = Math.floor(Date.now() / 1000) + 3600;
   const nonce = "localnonce";

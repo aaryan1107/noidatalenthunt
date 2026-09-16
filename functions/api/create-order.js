@@ -1,4 +1,5 @@
 import { eventIsOpen, getRegistrationAvailability } from "./_registration-availability.js";
+import { withErrorStatus } from "./_http-errors.js";
 import { NTH_S2 } from "../../src/data/sports.js";
 
 const PRICE_PER_ITEM = 10000; // Rs. 100 in paise
@@ -44,7 +45,12 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ success: false, error: "Request body must be valid JSON." }, 400);
+    }
 
     const participantName =
       body.participant_name ||
@@ -392,7 +398,7 @@ export async function onRequestOptions() {
 }
 
 function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(withErrorStatus(data, status)), {
     status,
     headers: corsHeaders()
   });

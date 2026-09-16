@@ -1,3 +1,5 @@
+import { withErrorStatus } from "./_http-errors.js";
+
 export async function onRequestGet(context) {
   const { request, env } = context;
 
@@ -39,7 +41,7 @@ export async function onRequestOptions() {
 }
 
 function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(withErrorStatus(data, status)), {
     status,
     headers: corsHeaders()
   });
