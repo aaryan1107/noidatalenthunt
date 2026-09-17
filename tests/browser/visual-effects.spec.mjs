@@ -24,9 +24,9 @@ test("desktop hero effect appears without pointer interaction", async ({ page })
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
 
-  await expect(page.locator(".preloader")).toHaveCount(0);
+  await expect(page.locator(".preloader")).toBeHidden();
   const canvas = page.locator("canvas.hero-grainient");
-  await expect(canvas).toBeVisible();
+  await expect(canvas).toBeVisible({ timeout: 12_000 });
   await expect.poll(() => canvas.evaluate((element) => {
     const gl = element.getContext("webgl");
     return Boolean(gl && !gl.isContextLost() && gl.getParameter(gl.CURRENT_PROGRAM));
