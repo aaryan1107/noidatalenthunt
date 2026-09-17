@@ -208,13 +208,19 @@ export default function Grainient({
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
     let running = true;
+    let lastDraw = -Infinity;
+    let frameInterval = 1000 / 30;
     const startedAt = performance.now();
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const width = Math.max(1, Math.round(rect.width * dpr));
-      const height = Math.max(1, Math.round(rect.height * dpr));
+      const mobile = rect.width <= 900;
+      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1 : 1.5);
+      const pixels = Math.max(1, rect.width * rect.height * dpr * dpr);
+      const scale = Math.min(1, Math.sqrt((mobile ? 400_000 : 1_200_000) / pixels));
+      const width = Math.max(1, Math.round(rect.width * dpr * scale));
+      const height = Math.max(1, Math.round(rect.height * dpr * scale));
+      frameInterval = 1000 / (mobile ? 24 : 30);
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
@@ -224,13 +230,18 @@ export default function Grainient({
     };
 
     const render = (now) => {
-      resize();
+      if (!reduceMotion && now - lastDraw < frameInterval) {
+        if (running) frame = requestAnimationFrame(render);
+        return;
+      }
+      lastDraw = now;
       const elapsed = reduceMotion ? 0 : ((now - startedAt) / 1000) * timeSpeed;
       gl.uniform1f(uTime, elapsed);
       gl.uniform1f(uGrainSeed, grainAnimated && !reduceMotion ? elapsed * 60.0 : 0.0);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       if (!reduceMotion && running) frame = requestAnimationFrame(render);
     };
+    resize();
     frame = requestAnimationFrame(render);
 
     // Stop burning GPU when the hero is scrolled away or the tab is hidden.
@@ -247,6 +258,7 @@ export default function Grainient({
     observer.observe(canvas);
 
     const resizeObserver = new ResizeObserver(() => {
+      resize();
       if (reduceMotion) requestAnimationFrame(render);
     });
     resizeObserver.observe(canvas);

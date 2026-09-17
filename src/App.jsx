@@ -54,8 +54,9 @@ function HeroField() {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(max-width: 900px), (prefers-reduced-motion: reduce)").matches) return undefined;
-    const timer = window.setTimeout(() => setAnimate(true), 1400);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const mobile = window.matchMedia("(max-width: 900px)").matches;
+    const timer = window.setTimeout(() => setAnimate(true), mobile ? 1800 : 1400);
     return () => window.clearTimeout(timer);
   }, []);
 

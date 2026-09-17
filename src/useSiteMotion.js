@@ -119,8 +119,8 @@ export function useSiteMotion(rootRef, ready = true) {
               const reveal = gsap.timeline({
                 scrollTrigger: { trigger: july, start: "top 88%", end: "top -20%", scrub: 0.6 },
               });
-              // The heading and lead follow scroll; body copy finishes revealing
-              // on its own so pausing mid-section never leaves a half-sentence.
+              // The heading and lead follow the section; body copy has its own
+              // short scroll range so the typewriter finishes before readers move on.
               if (heading) {
                 reveal.fromTo(
                   heading,
@@ -145,9 +145,14 @@ export function useSiteMotion(rootRef, ready = true) {
                   {
                     autoAlpha: 1,
                     duration: 0.01,
-                    stagger: 0.003,
+                    stagger: 0.002,
                     ease: "none",
-                    scrollTrigger: { trigger: typeChars[0].parentElement, start: "top 90%", once: true },
+                    scrollTrigger: {
+                      trigger: typeChars[0].parentElement,
+                      start: "top 88%",
+                      end: "top 62%",
+                      scrub: 0.2,
+                    },
                   },
                 );
               }
