@@ -89,20 +89,23 @@ export default function Preloader({ onDone }) {
     let released = false;
 
     const tick = (now) => {
+      if (released) return;
       const progress = Math.min(1, (now - startedAt) / 900);
       setPercent(Math.round(progress * 100));
-      if (progress === 1 && !released) {
-        released = true;
-        setLeaving(true);
-        doneTimer = window.setTimeout(() => doneRef.current?.(), 360);
-        return;
-      }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
+    const leaveTimer = window.setTimeout(() => {
+      released = true;
+      cancelAnimationFrame(frame);
+      setPercent(100);
+      setLeaving(true);
+      doneTimer = window.setTimeout(() => doneRef.current?.(), 360);
+    }, 900);
 
     return () => {
       cancelAnimationFrame(frame);
+      window.clearTimeout(leaveTimer);
       window.clearTimeout(doneTimer);
     };
   }, []);

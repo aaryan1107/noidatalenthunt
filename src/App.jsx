@@ -50,15 +50,15 @@ function BrandMark() {
   );
 }
 
-function HeroField() {
+function HeroField({ ready }) {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    if (!ready || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
     const mobile = window.matchMedia("(max-width: 900px)").matches;
-    const timer = window.setTimeout(() => setAnimate(true), mobile ? 1800 : 1400);
+    const timer = window.setTimeout(() => setAnimate(true), mobile ? 450 : 150);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [ready]);
 
   return (
     <div className="hero-field" aria-hidden="true">
@@ -169,10 +169,10 @@ function Navigation({ menuOpen, setMenuOpen }) {
   );
 }
 
-function Hero() {
+function Hero({ ready }) {
   return (
     <header className="hero" id="top">
-      <HeroField />
+      <HeroField ready={ready} />
       <div className="hero-copy">
         <span className="hero-kicker">Noida’s biggest youth talent platform</span>
         <h1 aria-label="Noida Sports Talent Hunt">
@@ -781,7 +781,7 @@ export default function App() {
       {!ready && <Preloader onDone={() => setReady(true)} />}
       <Navigation menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       <main>
-        <Hero />
+        <Hero ready={ready} />
         <JulyEdition />
         <ArchiveSequence />
         <SportsGrid selectSport={selectSport} availability={availability} />

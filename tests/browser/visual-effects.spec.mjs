@@ -4,6 +4,18 @@ test("preloader appears briefly without blocking the hero", async ({ page }) => 
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator(".preloader")).toBeVisible();
+  await expect(page.locator("canvas.hero-grainient")).toHaveCount(0);
+  await expect(page.locator(".preloader")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /Noida Sports Talent Hunt/i })).toBeVisible();
+});
+
+test("preloader still releases when animation frames stall", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.requestAnimationFrame = () => 0;
+    window.cancelAnimationFrame = () => {};
+  });
+  await page.goto("/");
+
   await expect(page.locator(".preloader")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /Noida Sports Talent Hunt/i })).toBeVisible();
 });
