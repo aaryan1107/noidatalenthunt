@@ -119,9 +119,8 @@ export function useSiteMotion(rootRef, ready = true) {
               const reveal = gsap.timeline({
                 scrollTrigger: { trigger: july, start: "top 88%", end: "top -20%", scrub: 0.6 },
               });
-              // Three consecutive beats, not simultaneous: heading wipes in,
-              // then the lead line slides in from the right, then — once
-              // that's settled — the body copy types itself out.
+              // The heading and lead follow scroll; body copy finishes revealing
+              // on its own so pausing mid-section never leaves a half-sentence.
               if (heading) {
                 reveal.fromTo(
                   heading,
@@ -138,12 +137,18 @@ export function useSiteMotion(rootRef, ready = true) {
                   1.1,
                 );
               }
+              let typeReveal;
               if (typeChars.length) {
-                reveal.fromTo(
+                typeReveal = gsap.fromTo(
                   typeChars,
                   { autoAlpha: 0 },
-                  { autoAlpha: 1, duration: 0.01, stagger: 0.035, ease: "none" },
-                  2.3,
+                  {
+                    autoAlpha: 1,
+                    duration: 0.01,
+                    stagger: 0.003,
+                    ease: "none",
+                    scrollTrigger: { trigger: typeChars[0].parentElement, start: "top 90%", once: true },
+                  },
                 );
               }
 
@@ -172,6 +177,7 @@ export function useSiteMotion(rootRef, ready = true) {
               );
               cleanup.push(() => {
                 reveal.kill();
+                typeReveal?.kill();
                 deck.kill();
               });
             }
