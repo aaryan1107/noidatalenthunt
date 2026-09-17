@@ -1,18 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./Preloader.css";
 
-const CRITICAL_ASSETS = [
-  "/archive/chess-wide.webp",
-  "/archive/badminton-wide.webp",
-  "/archive/swimming-wide.webp",
-  "/archive/shooting-wide.webp",
-  "/archive/gymnastics-jump.webp",
-  "/archive/gymnastics-beam.webp",
-  "/archive/instagram/daxrbuqvcao-cover.jpg",
-  "/archive/instagram/daf2a7opwws-cover.jpg",
-  "/archive/instagram/dz2pxtkd5he-cover.jpg",
-];
-
 function BadmintonLoop() {
   return (
     <svg viewBox="0 0 120 120" className="loader-figure loader-badminton" aria-hidden="true">
@@ -91,51 +79,22 @@ export default function Preloader({ onDone }) {
   const [loop] = useState(() => LOOPS[Math.floor(Math.random() * LOOPS.length)]);
   const [percent, setPercent] = useState(0);
   const [leaving, setLeaving] = useState(false);
-  const targetRef = useRef(0);
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
 
   useEffect(() => {
+    const startedAt = performance.now();
     let frame = 0;
-    let shown = 0;
-    let finished = 0;
+    let doneTimer = 0;
     let released = false;
 
-    const bump = () => {
-      finished += 1;
-      targetRef.current = Math.max(
-        targetRef.current,
-        Math.round((finished / CRITICAL_ASSETS.length) * 82),
-      );
-    };
-
-    CRITICAL_ASSETS.forEach((src) => {
-      const image = new Image();
-      image.onload = bump;
-      image.onerror = bump;
-      image.src = src;
-    });
-
-    const onWindowLoad = () => {
-      targetRef.current = 100;
-    };
-    if (document.readyState === "complete") targetRef.current = Math.max(targetRef.current, 100);
-    else window.addEventListener("load", onWindowLoad);
-
-    // Never strand a visitor behind the overlay if an asset hangs.
-    const failsafe = window.setTimeout(() => {
-      targetRef.current = 100;
-    }, 6000);
-
-    const tick = () => {
-      shown += Math.max(0.4, (targetRef.current - shown) * 0.08);
-      if (shown > targetRef.current) shown = targetRef.current;
-      setPercent(Math.min(100, Math.round(shown)));
-
-      if (shown >= 100 && !released) {
+    const tick = (now) => {
+      const progress = Math.min(1, (now - startedAt) / 900);
+      setPercent(Math.round(progress * 100));
+      if (progress === 1 && !released) {
         released = true;
         setLeaving(true);
-        window.setTimeout(() => doneRef.current && doneRef.current(), 620);
+        doneTimer = window.setTimeout(() => doneRef.current?.(), 360);
         return;
       }
       frame = requestAnimationFrame(tick);
@@ -144,8 +103,7 @@ export default function Preloader({ onDone }) {
 
     return () => {
       cancelAnimationFrame(frame);
-      window.clearTimeout(failsafe);
-      window.removeEventListener("load", onWindowLoad);
+      window.clearTimeout(doneTimer);
     };
   }, []);
 

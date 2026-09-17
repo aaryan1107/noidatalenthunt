@@ -154,6 +154,7 @@
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 30px;
+  background: #102015 url("/archive/badminton-wide.webp") center / cover no-repeat;
 }
 
 .archive-theatre-layer {
@@ -478,7 +479,7 @@
 }
 
 .founder-thought span {
-  color: #c96d12;
+  color: #9b5007;
   font-size: 13px;
   font-weight: 800;
 }
@@ -574,7 +575,7 @@
 .founder-champion > span {
   display: block;
   margin-bottom: 14px;
-  color: #287d50;
+  color: #1e6842;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -584,8 +585,8 @@
 
 .founder-champion-featured > span { color: rgba(255, 255, 255, 0.72); }
 .founder-champion h3 { margin: 0 0 9px; font-size: clamp(27px, 3vw, 43px); letter-spacing: -0.065em; line-height: 0.95; }
-.founder-champion p { max-width: 58ch; margin: 0; color: #6d7a72; font-size: 13px; font-style: italic; line-height: 1.6; }
-.founder-champion-featured p { color: rgba(255, 255, 255, 0.68); }
+.founder-champion p { max-width: 58ch; margin: 0; color: #526059; font-size: 13px; font-style: italic; line-height: 1.6; }
+.founder-champion-featured p { color: rgba(255, 255, 255, 0.82); }
 
 .founder-champion-featured > span,
 .founder-champion-featured h3 { grid-column: 1; }

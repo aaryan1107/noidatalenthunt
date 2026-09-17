@@ -88,7 +88,7 @@ export default function OpportunitySplit() {
           ))}
         </div>
         <div className="opportunity-mobile">
-          <img src="/archive/swimming-wide.webp" alt="Athletes competing at the July edition" loading="lazy" />
+          <img src="/archive/swimming-wide.webp" alt="Athletes competing at the July edition" width="1800" height="1200" loading="lazy" />
           <div className="opportunity-mobile-list">
             {OUTCOMES.map((outcome) => (
               <article key={outcome.title}>

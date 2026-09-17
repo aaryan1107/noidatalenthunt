@@ -27,6 +27,8 @@ export function useSiteMotion(rootRef, ready = true) {
             return undefined;
           }
 
+          if (!desktop) return undefined;
+
           const lines = gsap.utils.toArray(".hero-line-text");
           const intro = gsap.timeline();
           gsap.set(".sports-word", { autoAlpha: 0 });

@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { NTH_S2, SPORT_ORDER, SPORTS } from "../src/data/sports.js";
 
@@ -21,6 +21,7 @@ function page(slug, sport) {
 }
 
 const dist = resolve("dist");
+await copyFile(resolve("_headers"), resolve(dist, "_headers"));
 await Promise.all(SPORT_ORDER.map(async (slug) => {
   const directory = resolve(dist, "sports", slug);
   await mkdir(directory, { recursive: true });

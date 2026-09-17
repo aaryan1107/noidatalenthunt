@@ -1,16 +1,32 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import OpportunitySplit from "./components/OpportunitySplit";
 import ArchiveSequence from "./components/ArchiveSequence";
 import Preloader from "./components/Preloader";
-import Grainient from "./components/Grainient";
 import { NTH_S2, SPORTS, SPORT_ORDER } from "./data/sports";
 import { CONTACT } from "./data/contact";
 import WhatsAppButton from "./components/WhatsAppButton";
 import { useSiteMotion } from "./useSiteMotion";
-import nthFavicon from "../NTH FAVICON.png";
+
+function loadRazorpayCheckout() {
+  if (typeof window.Razorpay === "function") return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => typeof window.Razorpay === "function"
+      ? resolve()
+      : reject(new Error("Payment checkout did not load. Please try again."));
+    script.onerror = () => {
+      script.remove();
+      reject(new Error("Payment checkout did not load. Please try again."));
+    };
+    document.head.appendChild(script);
+  });
+}
 
 const FEE_PER_ITEM = 10000;
+const Grainient = lazy(() => import("./components/Grainient"));
 const AGE_GROUPS = [
   "5–8 years",
   "9–12 years",
@@ -29,15 +45,28 @@ function Arrow({ diagonal = false }) {
 function BrandMark() {
   return (
     <span className="brand-mark">
-      <img src={nthFavicon} alt="" />
+      <img src="/nth-mark.png" alt="" width="128" height="128" />
     </span>
   );
 }
 
 function HeroField() {
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(max-width: 900px), (prefers-reduced-motion: reduce)").matches) return undefined;
+    const start = () => setAnimate(true);
+    window.addEventListener("pointermove", start, { once: true });
+    window.addEventListener("keydown", start, { once: true });
+    return () => {
+      window.removeEventListener("pointermove", start);
+      window.removeEventListener("keydown", start);
+    };
+  }, []);
+
   return (
     <div className="hero-field" aria-hidden="true">
-      <Grainient
+      {animate && <Suspense fallback={null}><Grainient
         className="hero-grainient"
         color1="#08200f"
         color2="#2c7f4a"
@@ -61,7 +90,7 @@ function HeroField() {
         centerX={0}
         centerY={0}
         zoom={0.8}
-      />
+      /></Suspense>}
       <span className="hero-field-grain" />
       <span className="hero-field-veil" />
     </div>
@@ -126,7 +155,7 @@ function Navigation({ menuOpen, setMenuOpen }) {
         </button>
       </nav>
       </div>
-      <div className={`menu-overlay ${menuOpen ? "is-open" : ""}`} aria-hidden={!menuOpen}>
+      <div className={`menu-overlay ${menuOpen ? "is-open" : ""}`} aria-hidden={!menuOpen} inert={!menuOpen}>
         {[
           ["July edition", "#july"],
           ["Gallery", "#gallery"],
@@ -509,6 +538,7 @@ function Registration({ slug, onClose }) {
     try {
       setBusy(true);
       setStatus({ type: "info", text: "Creating your secure payment order…" });
+      await loadRazorpayCheckout();
       const response = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

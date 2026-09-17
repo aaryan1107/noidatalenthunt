@@ -2,7 +2,6 @@ import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { CONTACT, MAP_DIRECTIONS_URL, MAP_EMBED_URL, whatsappUrl } from "./data/contact";
 import WhatsAppButton from "./components/WhatsAppButton";
-import nthFavicon from "../NTH FAVICON.png";
 import "./tailwind.css";
 import "./styles.css";
 
@@ -43,7 +42,7 @@ function ContactPage() {
     <div className="contact-page">
       <header className="contact-nav">
         <a className="contact-brand" href="/">
-          <img className="contact-brand-mark" src={nthFavicon} alt="Noida Talent Hunt" />
+          <img className="contact-brand-mark" src="/nth-mark.png" alt="Noida Talent Hunt" width="128" height="128" />
           <span>Noida Talent Hunt</span>
         </a>
         <a href="/#sports">Register <Arrow /></a>

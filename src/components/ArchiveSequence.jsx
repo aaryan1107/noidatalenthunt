@@ -1,10 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import FisheyeInfiniteGrid from "./FisheyeInfiniteGrid";
 import "./ArchiveSequence.css";
 
 gsap.registerPlugin(ScrollTrigger);
+const FisheyeInfiniteGrid = lazy(() => import("./FisheyeInfiniteGrid"));
 
 const GALLERY_ITEMS = [
   { image: "/archive/chess-wide.webp", title: "Chess", meta: "July 2026" },
@@ -58,7 +58,7 @@ function FounderVision() {
       <div className="founder-vision-wrap">
         <aside className="founder-portrait-column">
           <div className="founder-portrait-stage">
-            <img src="/archive/mukesh-sharma-founder.png" alt="Mukesh Sharma, Chairperson of Prometheus School" />
+            <img src="/archive/mukesh-sharma-founder.webp" alt="Mukesh Sharma, Chairperson of Prometheus School" width="960" height="1280" loading="lazy" />
           </div>
           <div className="founder-thought">
             <svg className="founder-thought-thread" viewBox="0 0 118 86" aria-hidden="true">
@@ -174,12 +174,27 @@ function InstagramLightbox({ item, onClose }) {
 }
 
 export default function ArchiveSequence() {
+  const galleryRef = useRef(null);
+  const [galleryReady, setGalleryReady] = useState(false);
   const theatreRef = useRef(null);
   const videoRef = useRef(null);
   const [active, setActive] = useState(null);
   const [theatreReady, setTheatreReady] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    const gallery = galleryRef.current;
+    if (!gallery) return undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setGalleryReady(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: "300px 0px" });
+    observer.observe(gallery);
+    return () => observer.disconnect();
+  }, []);
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -285,8 +300,8 @@ export default function ArchiveSequence() {
                 @prometheussportsacademy. Drag anywhere, then open a clip to watch it.
               </p>
             </div>
-            <div className="archive-stage">
-              <FisheyeInfiniteGrid items={GALLERY_ITEMS} onSelect={onSelect} />
+            <div className="archive-stage" ref={galleryRef}>
+              {galleryReady && <Suspense fallback={null}><FisheyeInfiniteGrid items={GALLERY_ITEMS} onSelect={onSelect} /></Suspense>}
             </div>
           </div>
         </div>
@@ -329,7 +344,7 @@ export default function ArchiveSequence() {
                 className="theatre-sound"
                 type="button"
                 onClick={() => setMuted((value) => !value)}
-                aria-label={muted ? "Unmute" : "Mute"}
+                aria-label={muted ? "Sound off — unmute" : "Sound on — mute"}
               >
                 {muted ? "Sound off" : "Sound on"}
               </button>
