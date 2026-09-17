@@ -55,13 +55,8 @@ function HeroField() {
 
   useEffect(() => {
     if (window.matchMedia("(max-width: 900px), (prefers-reduced-motion: reduce)").matches) return undefined;
-    const start = () => setAnimate(true);
-    window.addEventListener("pointermove", start, { once: true });
-    window.addEventListener("keydown", start, { once: true });
-    return () => {
-      window.removeEventListener("pointermove", start);
-      window.removeEventListener("keydown", start);
-    };
+    const timer = window.setTimeout(() => setAnimate(true), 1400);
+    return () => window.clearTimeout(timer);
   }, []);
 
   return (

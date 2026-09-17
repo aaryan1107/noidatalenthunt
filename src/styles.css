@@ -374,6 +374,23 @@ a {
   height: 100%;
 }
 
+@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .hero-field::before {
+    position: absolute;
+    inset: -12%;
+    content: "";
+    background:
+      radial-gradient(ellipse at 77% 70%, rgba(218, 185, 68, 0.55), transparent 34%),
+      radial-gradient(ellipse at 27% 28%, rgba(54, 145, 80, 0.68), transparent 42%);
+    animation: heroFieldDrift 14s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes heroFieldDrift {
+  from { transform: translate3d(-5%, -3%, 0) scale(1); }
+  to { transform: translate3d(5%, 4%, 0) scale(1.12); }
+}
+
 /* Fine dot grid, echoing the campaign key art. */
 .hero-field-grain {
   position: absolute;
