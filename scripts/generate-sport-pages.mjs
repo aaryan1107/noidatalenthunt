@@ -10,7 +10,8 @@ function page(slug, sport) {
   const image = `${siteUrl}${sport.seo.ogImage}`;
   const title = `${sport.title} Registration | ${NTH_S2.displayName}`;
   const description = sport.seo.description;
-  const categories = sport.fields.flatMap((field) => field.options || []).slice(0, 12);
+  const options = sport.fields.flatMap((field) => field.options || []);
+  const categories = slug === "badminton" ? options : options.slice(0, 12);
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escape(title)}</title><meta name="description" content="${escape(description)}"><link rel="canonical" href="${url}">

@@ -44,25 +44,37 @@ export const SPORTS = {
         "hint": "Select every badminton event/category level required. Participants can select U-07 and any other eligible higher category/level separately if permitted by the organisers. No max cap is applied in Badminton; each selected item adds ₹100.",
         "options": [
           "Boys Singles - U-07",
-          "Boys Singles - U-09",
-          "Boys Singles - U-11",
-          "Boys Singles - U-13",
-          "Boys Singles - U-15",
-          "Boys Singles - U-17",
-          "Boys Singles - U-19",
           "Girls Singles - U-07",
+          "Boys Singles - U-09",
           "Girls Singles - U-09",
+          "Boys Singles - U-11",
           "Girls Singles - U-11",
+          "Boys Doubles - U-11",
+          "Girls Doubles - U-11",
+          "Boys Singles - U-13",
           "Girls Singles - U-13",
-          "Girls Singles - U-15",
-          "Girls Singles - U-17",
-          "Men's Singles",
-          "Women Single",
+          "Boys Doubles - U-13",
           "Girls Doubles - U-13",
-          "Girls Doubles - U-17",
+          "Boys Singles - U-15",
+          "Girls Singles - U-15",
           "Boys Doubles - U-15",
+          "Girls Doubles - U-15",
+          "Mixed Doubles - U-15",
+          "Boys Singles - U-17",
+          "Girls Singles - U-17",
           "Boys Doubles - U-17",
-          "Men Doubles"
+          "Girls Doubles - U-17",
+          "Mixed Doubles - U-17",
+          "Boys Singles - U-19",
+          "Girls Singles - U-19",
+          "Boys Doubles - U-19",
+          "Girls Doubles - U-19",
+          "Mixed Doubles - U-19",
+          "Men's Singles",
+          "Women's Singles",
+          "Men's Doubles",
+          "Women's Doubles",
+          "Mixed Doubles"
         ]
       },
       {
@@ -81,7 +93,7 @@ export const SPORTS = {
     "parentInfo": [
       {
         "title": "Participation",
-        "text": "Singles and doubles entries are available where listed in the form."
+        "text": "Under-7 and Under-9: boys’ and girls’ singles only. Under-11 and Under-13: boys’ and girls’ singles and doubles. Under-15, Under-17 and Under-19: boys’ and girls’ singles and doubles, plus mixed doubles. Senior (Open): men’s and women’s singles and doubles, plus mixed doubles."
       },
       {
         "title": "Age/category logic",
