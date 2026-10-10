@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import "./Preloader.css";
 
 function BadmintonLoop() {
@@ -82,17 +82,16 @@ export default function Preloader({ onDone }) {
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const startedAt = performance.now();
     let frame = 0;
-    let doneTimer = 0;
     let released = false;
 
     const tick = (now) => {
       if (released) return;
       const progress = Math.min(1, (now - startedAt) / 900);
       setPercent(Math.round(progress * 100));
-      frame = requestAnimationFrame(tick);
+      if (progress < 1) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     const leaveTimer = window.setTimeout(() => {
@@ -100,8 +99,10 @@ export default function Preloader({ onDone }) {
       cancelAnimationFrame(frame);
       setPercent(100);
       setLeaving(true);
-      doneTimer = window.setTimeout(() => doneRef.current?.(), 360);
     }, 900);
+    // Start the handoff deadline at mount, independently of the fade callback.
+    // A delayed fade must not extend how long the overlay blocks the page.
+    const doneTimer = window.setTimeout(() => doneRef.current?.(), 1_260);
 
     return () => {
       cancelAnimationFrame(frame);

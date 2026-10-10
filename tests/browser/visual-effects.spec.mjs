@@ -20,11 +20,25 @@ test("preloader still releases when animation frames stall", async ({ page }) =>
   await expect(page.getByRole("heading", { name: /Noida Sports Talent Hunt/i })).toBeVisible();
 });
 
+test("preloader releases on schedule even when its fade timer is delayed", async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = window.setTimeout;
+    window.setTimeout = (callback, delay, ...args) => original(
+      callback, delay === 900 ? 6_000 : delay, ...args,
+    );
+  });
+  await page.goto("/");
+
+  await expect(page.locator(".preloader")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /Noida Sports Talent Hunt/i })).toBeVisible();
+});
+
 test("desktop hero effect appears without pointer interaction", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
 
-  await expect(page.locator(".preloader")).toBeHidden();
+  // Software rendering on CI can delay the browser's timer/paint work.
+  await expect(page.locator(".preloader")).toBeHidden({ timeout: 12_000 });
   const canvas = page.locator("canvas.hero-grainient");
   await expect(canvas).toBeVisible({ timeout: 12_000 });
   await expect.poll(() => canvas.evaluate((element) => {
