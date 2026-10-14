@@ -31,7 +31,7 @@ const AGE_GROUPS = [
   "5–8 years",
   "9–12 years",
   "13–17 years",
-  "18+ open category",
+  "18+ years",
 ];
 
 function Arrow({ diagonal = false }) {

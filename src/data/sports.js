@@ -59,22 +59,14 @@ export const SPORTS = {
           "Girls Singles - U-15",
           "Boys Doubles - U-15",
           "Girls Doubles - U-15",
-          "Mixed Doubles - U-15",
           "Boys Singles - U-17",
           "Girls Singles - U-17",
           "Boys Doubles - U-17",
           "Girls Doubles - U-17",
-          "Mixed Doubles - U-17",
           "Boys Singles - U-19",
           "Girls Singles - U-19",
           "Boys Doubles - U-19",
-          "Girls Doubles - U-19",
-          "Mixed Doubles - U-19",
-          "Men's Singles",
-          "Women's Singles",
-          "Men's Doubles",
-          "Women's Doubles",
-          "Mixed Doubles"
+          "Girls Doubles - U-19"
         ]
       },
       {
@@ -93,7 +85,7 @@ export const SPORTS = {
     "parentInfo": [
       {
         "title": "Participation",
-        "text": "Under-7 and Under-9: boys’ and girls’ singles only. Under-11 and Under-13: boys’ and girls’ singles and doubles. Under-15, Under-17 and Under-19: boys’ and girls’ singles and doubles, plus mixed doubles. Senior (Open): men’s and women’s singles and doubles, plus mixed doubles."
+        "text": "Under-7 and Under-9: boys’ and girls’ singles only. Under-11, Under-13, Under-15, Under-17 and Under-19: boys’ and girls’ singles and doubles."
       },
       {
         "title": "Age/category logic",
@@ -133,7 +125,7 @@ export const SPORTS = {
       "Please select at most 2 event/category options.",
       "Age eligibility must match the selected category.",
       "Under-11, Under-13, Under-15 and Under-19 categories are separated for Boys and Girls.",
-      "Men and Women categories are separate.",
+      "Under-7 and Under-9 categories are mixed.",
       "Participants should report as per schedule shared by the organizing team.",
       "Final schedule and match format will be communicated before the event."
     ],
@@ -159,9 +151,7 @@ export const SPORTS = {
           "Under-15 Boys (Born on or after 01/01/2012)",
           "Under-15 Girls (Born on or after 01/01/2012)",
           "Under-19 Boys (Born on or after 01/01/2008)",
-          "Under-19 Girls (Born on or after 01/01/2008)",
-          "Men",
-          "Women"
+          "Under-19 Girls (Born on or after 01/01/2008)"
         ]
       }
     ],

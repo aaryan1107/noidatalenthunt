@@ -6,6 +6,7 @@ import { onRequestPost as razorpayWebhook } from "../functions/api/razorpay-webh
 import { csvEscape } from "../functions/api/_organiser-auth.js";
 import { onRequestGet as registrationStatus } from "../functions/api/registration-status.js";
 import { onRequestPatch as updateAvailability } from "../functions/api/organiser-availability.js";
+import { SPORTS } from "../src/data/sports.js";
 
 const env = {
   RAZORPAY_KEY_ID: "rzp_test_local",
@@ -60,7 +61,7 @@ test("order amount is server-calculated and pending row is saved before checkout
     const response = await createOrder(context("create-order", {
       participant_name: "Local Test", event: "Badminton", category_slug: "badminton",
       address: "Noida", contact: "9876543210", amount: 1,
-      cart_items: [{ label: "Singles" }, { label: "Doubles" }]
+      cart_items: [{ label: "Boys Singles - U-13" }, { label: "Boys Doubles - U-13" }]
     }));
     const body = await response.json();
     assert.equal(response.status, 200);
@@ -69,6 +70,60 @@ test("order amount is server-calculated and pending row is saved before checkout
     assert.equal(savedRow.amount, 20000);
     assert.equal(savedRow.payment_status, "PENDING_PAYMENT");
     assert.equal(savedRow.razorpay_order_id, "order_local");
+  });
+});
+
+test("removed categories and historical labels cannot create payment orders", async () => {
+  const removed = {
+    badminton: ["Mixed Doubles - U-15", "Mixed Doubles - U-17", "Mixed Doubles - U-19", "Men's Singles", "Women's Singles", "Men's Doubles", "Women's Doubles", "Mixed Doubles", "Women Single"],
+    "table-tennis": ["Men", "Women"]
+  };
+  await withFetch(() => { throw new Error("Removed categories must not reach external APIs"); }, async () => {
+    for (const [slug, labels] of Object.entries(removed)) {
+      for (const label of labels) {
+        for (const selections of [{ cart_items: [{ label }] }, { [SPORTS[slug].fields[0].name]: [label] }]) {
+          const response = await createOrder(context("create-order", {
+            participant_name: "Local Test", event: SPORTS[slug].title, category_slug: slug,
+            address: "Noida", contact: "9876543210", ...selections
+          }));
+          assert.equal(response.status, 400, `${slug}: ${label}`);
+          assert.match((await response.json()).error, /no longer available/);
+        }
+      }
+    }
+  });
+});
+
+test("every remaining badminton and table tennis option can be purchased", async () => {
+  await withFetch(async (url, options = {}) => {
+    if (String(url).endsWith("/v1/orders")) {
+      return Response.json({ id: "order_local", amount: JSON.parse(options.body).amount, currency: "INR" });
+    }
+    return Response.json([]);
+  }, async () => {
+    for (const slug of ["badminton", "table-tennis"]) {
+      for (const label of SPORTS[slug].fields[0].options) {
+        const response = await createOrder(context("create-order", {
+          participant_name: "Local Test", event: SPORTS[slug].title, category_slug: slug,
+          address: "Noida", contact: "9876543210", cart_items: [{ label }]
+        }));
+        assert.equal(response.status, 200, label);
+        assert.equal((await response.json()).amount, 10000);
+      }
+    }
+  });
+});
+
+test("duplicate categories and excess table tennis selections are rejected", async () => {
+  await withFetch(() => { throw new Error("Invalid selections must not create orders"); }, async () => {
+    const options = SPORTS["table-tennis"].fields[0].options;
+    for (const labels of [[options[0], options[0]], options.slice(0, 3)]) {
+      const response = await createOrder(context("create-order", {
+        participant_name: "Local Test", event: "Untrusted title", category_slug: "table-tennis",
+        address: "Noida", contact: "9876543210", cart_items: labels
+      }));
+      assert.equal(response.status, 400);
+    }
   });
 });
 

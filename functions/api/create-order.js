@@ -1,6 +1,6 @@
 import { eventIsOpen, getRegistrationAvailability } from "./_registration-availability.js";
 import { withErrorStatus } from "./_http-errors.js";
-import { NTH_S2 } from "../../src/data/sports.js";
+import { NTH_S2, SPORTS } from "../../src/data/sports.js";
 
 const PRICE_PER_ITEM = 10000; // Rs. 100 in paise
 const REGISTRATION_TABLE = "registrations_october_2026";
@@ -118,7 +118,21 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    if (eventName.toLowerCase().includes("table tennis") && cartItems.length > 2) {
+    // Check the current catalogue so stale tabs cannot buy removed categories.
+    if (["badminton", "table-tennis"].includes(categorySlug)) {
+      const field = SPORTS[categorySlug].fields.find(field => field.type === "checkbox");
+      if (cartItems.some(item => !field.options.includes(item.label))) {
+        return jsonResponse({
+          success: false,
+          error: "A selected category is no longer available. Refresh the page and choose a current category."
+        }, 400);
+      }
+      if (new Set(cartItems.map(item => item.label)).size !== cartItems.length) {
+        return jsonResponse({ success: false, error: "Select each event/category only once." }, 400);
+      }
+    }
+
+    if (categorySlug === "table-tennis" && cartItems.length > SPORTS[categorySlug].fields[0].max) {
       return jsonResponse({
         success: false,
         error: "Table Tennis allows a maximum of 2 categories only."
