@@ -482,8 +482,7 @@ export const SPORTS = {
         "options": [
           "Under-10 Sitting",
           "Under-16",
-          "Under-19",
-          "Open"
+          "Under-19"
         ]
       },
       {
