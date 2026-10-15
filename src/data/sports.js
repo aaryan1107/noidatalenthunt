@@ -19,14 +19,14 @@ export const SPORTS = {
     "venue": "Prometheus School, Noida",
     "fee": "₹100 per selected event/category",
     "whatsapp": "https://chat.whatsapp.com/LvkKAFZqC9FETVISdKyyag?s=cl&p=i&ilr=4&amv=0",
-    "intro": "Badminton registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
+    "intro": " registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
     "rules": [
       "Feather shuttlecocks will be used for all categories.",
       "Match format: Best of 3 games of 15 points.",
       "Players must report 30 minutes before match time.",
       "Protest fee: ₹3000, non-refundable.",
       "Entry fee is non-refundable; refund only if event is cancelled.",
-      "Multiple badminton event/category levels may be selected where eligible; each selected entry is charged separately at ₹100.",
+      "Multiple  event/category levels may be selected where eligible; each selected entry is charged separately at ₹100.",
       "Referee and umpire decisions will be final.",
       "All rules and regulations will be strictly as per BAI."
     ],
@@ -39,9 +39,9 @@ export const SPORTS = {
     "fields": [
       {
         "type": "checkbox",
-        "name": "badminton_events",
-        "label": "Select Badminton Event(s) - ₹100 each",
-        "hint": "Select every badminton event/category level required. Participants can select U-07 and any other eligible higher category/level separately if permitted by the organisers. No max cap is applied in Badminton; each selected item adds ₹100.",
+        "name": "_events",
+        "label": "Select  Event(s) - ₹100 each",
+        "hint": "Select every  event/category level required. Participants can select U-07 and any other eligible higher category/level separately if permitted by the organisers. No max cap is applied in ; each selected item adds ₹100.",
         "options": [
           "Boys Singles - U-07",
           "Girls Singles - U-07",
@@ -49,24 +49,18 @@ export const SPORTS = {
           "Girls Singles - U-09",
           "Boys Singles - U-11",
           "Girls Singles - U-11",
-          "Boys Doubles - U-11",
-          "Girls Doubles - U-11",
           "Boys Singles - U-13",
           "Girls Singles - U-13",
-          "Boys Doubles - U-13",
           "Girls Doubles - U-13",
           "Boys Singles - U-15",
           "Girls Singles - U-15",
           "Boys Doubles - U-15",
-          "Girls Doubles - U-15",
           "Boys Singles - U-17",
           "Girls Singles - U-17",
           "Boys Doubles - U-17",
           "Girls Doubles - U-17",
           "Boys Singles - U-19",
-          "Girls Singles - U-19",
-          "Boys Doubles - U-19",
-          "Girls Doubles - U-19"
+          "Girls Singles - U-19"
         ]
       },
       {
@@ -93,7 +87,7 @@ export const SPORTS = {
       },
       {
         "title": "Event options",
-        "text": "Badminton event options are already listed in the form. Multiple eligible entries may be selected; each selected entry adds ₹100."
+        "text": " event options are already listed in the form. Multiple eligible entries may be selected; each selected entry adds ₹100."
       },
       {
         "title": "Bring / prepare",
