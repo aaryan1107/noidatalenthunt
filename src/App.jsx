@@ -190,7 +190,7 @@ function Hero({ ready }) {
           </span>
         </p>
         <p className="hero-intro hero-support">
-          A city stage for young athletes to compete, be seen, and earn consideration for sports scholarships and high-performance training.
+          A city stage exclusively for young athletes residing in Noida to compete, be seen, and earn consideration for sports scholarships and high-performance training.
         </p>
         <div className="hero-action hero-support">
           <ActionLink href="#sports">Choose your sport</ActionLink>
