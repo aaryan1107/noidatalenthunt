@@ -1803,3 +1803,8 @@ footer h2 {
   margin-top: 2px;
   accent-color: var(--green-deep);
 }
+
+.hero-eligibility.hero-support {
+  width: min(560px, 100%);
+  text-align: center;
+}
