@@ -60,8 +60,8 @@ test("order amount is server-calculated and pending row is saved before checkout
   }, async () => {
     const response = await createOrder(context("create-order", {
       participant_name: "Local Test", event: "Badminton", category_slug: "badminton",
-      address: "Noida", contact: "9876543210", amount: 1,
-      cart_items: [{ label: "Boys Singles - U-13" }, { label: "Boys Doubles - U-13" }]
+      address: "Noida", residence_city: "Noida", residency_confirmed: true, contact: "9876543210", amount: 1,
+      cart_items: [{ label: "Boys Singles - U-15" }, { label: "Boys Doubles - U-15" }]
     }));
     const body = await response.json();
     assert.equal(response.status, 200);
@@ -84,7 +84,7 @@ test("removed categories and historical labels cannot create payment orders", as
         for (const selections of [{ cart_items: [{ label }] }, { [SPORTS[slug].fields[0].name]: [label] }]) {
           const response = await createOrder(context("create-order", {
             participant_name: "Local Test", event: SPORTS[slug].title, category_slug: slug,
-            address: "Noida", contact: "9876543210", ...selections
+            address: "Noida", residence_city: "Noida", residency_confirmed: true, contact: "9876543210", ...selections
           }));
           assert.equal(response.status, 400, `${slug}: ${label}`);
           assert.match((await response.json()).error, /no longer available/);
@@ -105,7 +105,7 @@ test("every remaining badminton and table tennis option can be purchased", async
       for (const label of SPORTS[slug].fields[0].options) {
         const response = await createOrder(context("create-order", {
           participant_name: "Local Test", event: SPORTS[slug].title, category_slug: slug,
-          address: "Noida", contact: "9876543210", cart_items: [{ label }]
+          address: "Noida", residence_city: "Noida", residency_confirmed: true, contact: "9876543210", cart_items: [{ label }]
         }));
         assert.equal(response.status, 200, label);
         assert.equal((await response.json()).amount, 10000);
@@ -120,7 +120,7 @@ test("duplicate categories and excess table tennis selections are rejected", asy
     for (const labels of [[options[0], options[0]], options.slice(0, 3)]) {
       const response = await createOrder(context("create-order", {
         participant_name: "Local Test", event: "Untrusted title", category_slug: "table-tennis",
-        address: "Noida", contact: "9876543210", cart_items: labels
+        address: "Noida", residence_city: "Noida", residency_confirmed: true, contact: "9876543210", cart_items: labels
       }));
       assert.equal(response.status, 400);
     }
@@ -222,7 +222,7 @@ test("availability is uncached and creates no order when a live sport is closed"
   }, async () => {
     const closed = await createOrder(context("create-order", {
       participant_name: "Local Test", event: "Chess", category_slug: "chess",
-      address: "Noida", contact: "9876543210", cart_items: [{ label: "Under-11" }]
+      address: "Noida", residence_city: "Noida", residency_confirmed: true, contact: "9876543210", cart_items: [{ label: "Under-11" }]
     }, {}, dynamicEnv));
     assert.equal(closed.status, 409);
     assert.match((await closed.json()).error, /closed/);
@@ -254,4 +254,25 @@ test("availability changes require an organiser session and update only an appro
   });
   assert.equal(patch.is_open, false);
   assert.equal(patch.slots_available, 0);
+});
+
+test("non-Noida or unconfirmed residency cannot create payment orders", async () => {
+  await withFetch(() => { throw new Error("Ineligible registrations must not reach external APIs"); }, async () => {
+    const base = {
+      participant_name: "Local Test", event: "Badminton", category_slug: "badminton",
+      address: "Noida", contact: "9876543210", cart_items: [{ label: "Boys Singles - U-13" }]
+    };
+    const cases = [
+      { residence_city: "Delhi", residency_confirmed: true },
+      { residence_city: "Greater Noida", residency_confirmed: true },
+      { residence_city: "Noida", residency_confirmed: false },
+      { residence_city: "Noida" },
+      { residency_confirmed: true }
+    ];
+    for (const extra of cases) {
+      const response = await createOrder(context("create-order", { ...base, ...extra }));
+      assert.equal(response.status, 422, JSON.stringify(extra));
+      assert.match((await response.json()).error, /exclusively for residents of Noida/);
+    }
+  });
 });

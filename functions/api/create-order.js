@@ -1,6 +1,6 @@
 import { eventIsOpen, getRegistrationAvailability } from "./_registration-availability.js";
 import { withErrorStatus } from "./_http-errors.js";
-import { NTH_S2, SPORTS } from "../../src/data/sports.js";
+import { ELIGIBILITY, NTH_S2, SPORTS, isNoidaResident } from "../../src/data/sports.js";
 
 const PRICE_PER_ITEM = 10000; // Rs. 100 in paise
 const REGISTRATION_TABLE = "registrations_october_2026";
@@ -98,6 +98,13 @@ export async function onRequestPost(context) {
         success: false,
         error: "Please enter the participant address."
       }, 400);
+    }
+
+    if (!isNoidaResident(body.residence_city) || body.residency_confirmed !== true) {
+      return jsonResponse({
+        success: false,
+        error: ELIGIBILITY.cityError
+      }, 422);
     }
 
     const missing = requiredEnv(env);

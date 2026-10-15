@@ -7,6 +7,30 @@ export const NTH_S2 = Object.freeze({
   endDate: "2026-11-01",
 });
 
+export const ELIGIBILITY = Object.freeze({
+  hero: "Eligibility: Open exclusively to residents of Noida. Participants residing in Delhi or other cities are not eligible.",
+  lineup: "Participation is restricted to athletes residing in Noida. All registrations are subject to residency verification.",
+  formNotice: "Important Eligibility Notice: Noida Sports Talent Hunt 2026 is exclusively for residents of Noida. Participants residing outside Noida, including Delhi, are not eligible to register.",
+  confirm: "I confirm that the participant is a resident of Noida and meets the event's eligibility requirements.",
+  term: "Participation in Noida Sports Talent Hunt 2026 is restricted to athletes residing in Noida. Organisers reserve the right to verify residency and reject registrations that do not meet the eligibility requirements.",
+  cityError: "Noida Sports Talent Hunt 2026 is exclusively for residents of Noida. Participants residing outside Noida, including Delhi, are not eligible to register.",
+});
+
+// Only "Noida" proceeds. Greater Noida is deliberately not auto-accepted (policy not yet approved).
+export const RESIDENCE_CITIES = Object.freeze([
+  "Noida",
+  "Greater Noida",
+  "Delhi",
+  "Ghaziabad",
+  "Gurugram",
+  "Faridabad",
+  "Other city",
+]);
+
+export function isNoidaResident(city) {
+  return String(city || "").trim().toLowerCase() === "noida";
+}
+
 export const SPORTS = {
   "badminton": {
     "title": "Badminton",
@@ -19,14 +43,14 @@ export const SPORTS = {
     "venue": "Prometheus School, Noida",
     "fee": "₹100 per selected event/category",
     "whatsapp": "https://chat.whatsapp.com/LvkKAFZqC9FETVISdKyyag?s=cl&p=i&ilr=4&amv=0",
-    "intro": " registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
+    "intro": "Badminton registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
     "rules": [
       "Feather shuttlecocks will be used for all categories.",
       "Match format: Best of 3 games of 15 points.",
       "Players must report 30 minutes before match time.",
       "Protest fee: ₹3000, non-refundable.",
       "Entry fee is non-refundable; refund only if event is cancelled.",
-      "Multiple  event/category levels may be selected where eligible; each selected entry is charged separately at ₹100.",
+      "Multiple badminton event/category levels may be selected where eligible; each selected entry is charged separately at ₹100.",
       "Referee and umpire decisions will be final.",
       "All rules and regulations will be strictly as per BAI."
     ],
@@ -39,9 +63,9 @@ export const SPORTS = {
     "fields": [
       {
         "type": "checkbox",
-        "name": "_events",
-        "label": "Select  Event(s) - ₹100 each",
-        "hint": "Select every  event/category level required. Participants can select U-07 and any other eligible higher category/level separately if permitted by the organisers. No max cap is applied in ; each selected item adds ₹100.",
+        "name": "badminton_events",
+        "label": "Select Badminton Event(s) - ₹100 each",
+        "hint": "Select every badminton event/category level required. Participants can select U-07 and any other eligible higher category/level separately if permitted by the organisers. No max cap is applied in Badminton; each selected item adds ₹100.",
         "options": [
           "Boys Singles - U-07",
           "Girls Singles - U-07",
@@ -79,7 +103,7 @@ export const SPORTS = {
     "parentInfo": [
       {
         "title": "Participation",
-        "text": "Under-7 and Under-9: boys’ and girls’ singles only. Under-11, Under-13, Under-15, Under-17 and Under-19: boys’ and girls’ singles and doubles."
+        "text": "Under-7 and Under-9: boys’ and girls’ singles only. Singles and doubles categories for older age groups are listed in the form."
       },
       {
         "title": "Age/category logic",
@@ -87,7 +111,7 @@ export const SPORTS = {
       },
       {
         "title": "Event options",
-        "text": " event options are already listed in the form. Multiple eligible entries may be selected; each selected entry adds ₹100."
+        "text": "Badminton event options are already listed in the form. Multiple eligible entries may be selected; each selected entry adds ₹100."
       },
       {
         "title": "Bring / prepare",
@@ -118,7 +142,7 @@ export const SPORTS = {
     "rules": [
       "Please select at most 2 event/category options.",
       "Age eligibility must match the selected category.",
-      "Under-11, Under-13, Under-15 and Under-19 categories are separated for Boys and Girls.",
+      "Under-11, Under-13, Under-15 and Under-17 categories are separated for Boys and Girls.",
       "Under-7 and Under-9 categories are mixed.",
       "Participants should report as per schedule shared by the organizing team.",
       "Final schedule and match format will be communicated before the event."
@@ -562,3 +586,7 @@ export const SPORT_ORDER = [
   "gymnastics",
   "shooting",
 ];
+
+Object.values(SPORTS).forEach((sport) => {
+  sport.rules = [...sport.rules, ELIGIBILITY.term];
+});

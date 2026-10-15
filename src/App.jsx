@@ -3,7 +3,7 @@ import gsap from "gsap";
 import OpportunitySplit from "./components/OpportunitySplit";
 import ArchiveSequence from "./components/ArchiveSequence";
 import Preloader from "./components/Preloader";
-import { NTH_S2, SPORTS, SPORT_ORDER } from "./data/sports";
+import { ELIGIBILITY, NTH_S2, RESIDENCE_CITIES, SPORTS, SPORT_ORDER, isNoidaResident } from "./data/sports";
 import { CONTACT } from "./data/contact";
 import WhatsAppButton from "./components/WhatsAppButton";
 import { useSiteMotion } from "./useSiteMotion";
@@ -192,6 +192,7 @@ function Hero({ ready }) {
         <p className="hero-intro hero-support">
           A city stage exclusively for young athletes residing in Noida to compete, be seen, and earn consideration for sports scholarships and high-performance training.
         </p>
+        <p className="hero-eligibility hero-support">{ELIGIBILITY.hero}</p>
         <div className="hero-action hero-support">
           <ActionLink href="#sports">Choose your sport</ActionLink>
         </div>
@@ -270,6 +271,7 @@ function SportsGrid({ selectSport, availability }) {
           <span className="eyebrow">October line-up</span>
           <h2>Pick the arena that feels like yours.</h2>
           <p>Every registration is ₹100 per selected event or category. Noida Talent Hunt S2 takes place on {NTH_S2.dates}.</p>
+          <p className="residency-note">{ELIGIBILITY.lineup}</p>
         </div>
         <div className="sports-grid">
           {SPORT_ORDER.map((slug, index) => {
@@ -505,6 +507,15 @@ function Registration({ slug, onClose }) {
     if (!form.reportValidity() || !validateGroups(form)) return;
 
     const data = formDataObject(form);
+    if (!isNoidaResident(data.residence_city)) {
+      setStatus({ type: "error", text: ELIGIBILITY.cityError });
+      return;
+    }
+    data.residency_confirmed = form.elements.residency_confirmed?.checked === true;
+    if (!data.residency_confirmed) {
+      setStatus({ type: "error", text: "Please confirm the participant is a resident of Noida to continue." });
+      return;
+    }
     if (slug === "badminton" && asArray(data.badminton_events).some((item) => /Doubles/i.test(item)) && !String(data.partner_name || "").trim()) {
       setStatus({ type: "error", text: "Enter the doubles partner name for the selected doubles event." });
       return;
@@ -662,6 +673,7 @@ function Registration({ slug, onClose }) {
                 <label className="field"><span>Aadhaar / passport number<sup>*</sup></span><input name="id_number" required placeholder="Participant ID number" /></label>
                 <label className="field"><span>Age group<sup>*</sup></span><select name="age_group" required defaultValue=""><option value="" disabled>Select age group</option>{AGE_GROUPS.map((group) => <option key={group}>{group}</option>)}</select></label>
                 <label className="field"><span>Gender<sup>*</sup></span><select name="gender" required defaultValue=""><option value="" disabled>Select gender</option><option>Boys</option><option>Girls</option></select></label>
+                <label className="field"><span>City of residence<sup>*</sup></span><select name="residence_city" required defaultValue=""><option value="" disabled>Select city</option>{RESIDENCE_CITIES.map((city) => <option key={city}>{city}</option>)}</select></label>
                 <label className="field field-full"><span>Residential address<sup>*</sup></span><textarea name="address" required rows="3" placeholder="House / flat, street, locality, city and PIN code" /></label>
               </div>
               <div className="sport-fields">
@@ -677,6 +689,11 @@ function Registration({ slug, onClose }) {
                   ))}
                 </div>
               </div>
+              <p className="eligibility-notice" role="note">{ELIGIBILITY.formNotice}</p>
+              <label className="residency-confirm">
+                <input type="checkbox" name="residency_confirmed" required />
+                <span>{ELIGIBILITY.confirm}</span>
+              </label>
               <div className="payment-panel">
                 <div>
                   <span className="payment-label">Your selection</span>
