@@ -37,7 +37,11 @@ export async function onRequestGet(context) {
     query.set("payment_status", "in.(PAID_CONFIRMED,PAID_CONFIRMED_MANUAL)");
     query.set("canonical_rank", "eq.1");
   }
-  if (status === "pending") query.set("payment_status", "in.(PENDING_PAYMENT,AUTHORIZED)");
+  if (status === "pending") {
+    query.set("payment_status", "in.(PENDING_PAYMENT,AUTHORIZED)");
+    query.set("has_confirmed_match", "eq.false");
+    query.set("canonical_rank", "eq.1");
+  }
 
   const response = await fetch(supabaseRestUrl(context.env, `${TABLE}?${query}`), {
     headers: { apikey: context.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${context.env.SUPABASE_SERVICE_ROLE_KEY}` }

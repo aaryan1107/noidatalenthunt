@@ -276,3 +276,25 @@ test("non-Noida or unconfirmed residency cannot create payment orders", async ()
     }
   });
 });
+
+test("organiser pending JSON and CSV exclude paid retries and duplicate attempts", async () => {
+  const { onRequestGet } = await import("../functions/api/organiser-registrations.js");
+  const expires = Math.floor(Date.now() / 1000) + 3600;
+  const nonce = "pendingtest";
+  const signature = await signed(`${expires}.${nonce}`, env.ORGANISER_PORTAL_SESSION_SECRET);
+  for (const format of ["json", "csv"]) {
+    await withFetch(async url => {
+      const query = new URL(url).searchParams;
+      assert.equal(query.get("payment_status"), "in.(PENDING_PAYMENT,AUTHORIZED)");
+      assert.equal(query.get("has_confirmed_match"), "eq.false");
+      assert.equal(query.get("canonical_rank"), "eq.1");
+      return Response.json([]);
+    }, async () => {
+      const response = await onRequestGet({ env, request: new Request(
+        `https://example.test/api/organiser-registrations?status=pending&format=${format}`,
+        { headers: { Cookie: `nth_organiser_session=${expires}.${nonce}.${signature}` } }
+      ) });
+      assert.equal(response.status, 200);
+    });
+  }
+});

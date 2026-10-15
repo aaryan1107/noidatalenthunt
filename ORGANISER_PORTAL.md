@@ -55,3 +55,22 @@ Then confirm the table/view grants and RLS flags in the Supabase Dashboard's
 Security Advisor. The first command requires an authenticated, linked Supabase
 CLI project; it was not runnable in the local checkout used to prepare this
 change because no project link or local Docker database was available.
+
+## Pending payment reconciliation
+
+Apply `20261015110000_reconcile_october_pending_payment_views.sql` after the
+September migrations. The organiser pending JSON/CSV and SQL pending report
+exclude event entries with a confirmed match and show only the canonical
+pending attempt. Name/event identity normalization lowercases before stripping
+punctuation so capitalization differences do not break duplicate matching.
+
+October receipt evidence and explicitly reviewed identity changes can be kept
+in the server-only `payment_reconciliation` column. Its `superseded_by` value
+links a stale checkout to its confirmed registration; it does not mark that
+checkout as paid or change gateway IDs. Original attempts remain available in
+the all-states and duplicate audit views. Receipt screenshots and participant
+reconciliation SQL/backups belong in private local storage, outside Git.
+
+Deploy the Pages Functions change as well as applying the SQL migration: an
+older deployed API still selects stale attempts directly from the event-row
+view. Verify the API contract with `node --test tests/payment-flow.test.mjs`.
