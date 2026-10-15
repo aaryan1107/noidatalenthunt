@@ -3,6 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/browser",
   reporter: "list",
+  // CI runners use software rendering; the preloader handoff can exceed the 5s default there.
+  expect: { timeout: 15_000 },
   outputDir: "node_modules/.cache/playwright-results",
   use: {
     ...devices["Desktop Chrome"],
