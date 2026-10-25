@@ -142,7 +142,7 @@ export const SPORTS = {
     "rules": [
       "Please select at most 2 event/category options.",
       "Age eligibility must match the selected category.",
-      "Under-11, Under-13, Under-15 and Under-17 categories are separated for Boys and Girls.",
+      "Under-11, Under-13, Under-15, Under-17 and Under-19 categories are separated for Boys and Girls.",
       "Under-7 and Under-9 categories are mixed.",
       "Participants should report as per schedule shared by the organizing team.",
       "Final schedule and match format will be communicated before the event."
@@ -169,7 +169,9 @@ export const SPORTS = {
           "Under-15 Boys (Born on or after 01/01/2012)",
           "Under-15 Girls (Born on or after 01/01/2012)",
           "Under-17 Boys (Born on or after 01/01/2010)",
-          "Under-17 Girls (Born on or after 01/01/2010)"
+          "Under-17 Girls (Born on or after 01/01/2010)",
+          "Under-19 Boys (Born on or after 01/01/2008)",
+          "Under-19 Girls (Born on or after 01/01/2008)"
         ]
       }
     ],
