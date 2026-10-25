@@ -168,8 +168,8 @@ export const SPORTS = {
           "Under-13 Girls (Born on or after 01/01/2014)",
           "Under-15 Boys (Born on or after 01/01/2012)",
           "Under-15 Girls (Born on or after 01/01/2012)",
-          "Under-17 Boys (Born on or after 01/01/2008)",
-          "Under-17 Girls (Born on or after 01/01/2008)"
+          "Under-17 Boys (Born on or after 01/01/2010)",
+          "Under-17 Girls (Born on or after 01/01/2010)"
         ]
       }
     ],
