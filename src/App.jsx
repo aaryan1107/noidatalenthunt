@@ -3,7 +3,7 @@ import gsap from "gsap";
 import OpportunitySplit from "./components/OpportunitySplit";
 import ArchiveSequence from "./components/ArchiveSequence";
 import Preloader from "./components/Preloader";
-import { ELIGIBILITY, NTH_S2, RESIDENCE_CITIES, SPORTS, SPORT_ORDER, isNoidaResident } from "./data/sports";
+import { ELIGIBILITY, NTH_S2, RESIDENCE_CITIES, SPORTS, SPORT_ORDER, eligibilityFor, isEligibleResident } from "./data/sports";
 import { CONTACT } from "./data/contact";
 import WhatsAppButton from "./components/WhatsAppButton";
 import { useSiteMotion } from "./useSiteMotion";
@@ -270,7 +270,7 @@ function SportsGrid({ selectSport, availability }) {
         <div className="section-heading">
           <span className="eyebrow">October line-up</span>
           <h2>Pick the arena that feels like yours.</h2>
-          <p>Every registration is ₹100 per selected event or category. Noida Talent Hunt S2 takes place on {NTH_S2.dates}.</p>
+          <p>Chess entry is ₹100 per player; other sports are ₹100 per selected event or category. Noida Talent Hunt S2 takes place on {NTH_S2.dates}.</p>
           <p className="residency-note">{ELIGIBILITY.lineup}</p>
         </div>
         <div className="sports-grid">
@@ -284,7 +284,7 @@ function SportsGrid({ selectSport, availability }) {
                   <span className="sport-index">0{index + 1}</span>
                   <SportGlyph slug={slug} />
                   <span className="sport-name">{sport.title}</span>
-                  <span className="sport-meta">{isOpen ? `Open · ${NTH_S2.dates} · ₹100` : "Registrations closed"}</span>
+                  <span className="sport-meta">{isOpen ? `Open · ${sport.dates} · ₹100` : "Registrations closed"}</span>
                   <span className="sport-arrow"><Arrow diagonal /></span>
                 </button>
               </div>
@@ -389,7 +389,7 @@ function RegistrationConfirmed({ onboarding, registrationId, onClose }) {
       <span className="eyebrow">Payment verified</span>
       <h3>You’re in. Two things left.</h3>
       <p>
-        Your {onboarding.sport} registration for {NTH_S2.sessionName} ({NTH_S2.dates}) is confirmed and saved. Reference{" "}
+        Your {onboarding.sport} registration for {NTH_S2.sessionName} ({Object.values(SPORTS).find((sport) => sport.title === onboarding.sport)?.dates || NTH_S2.dates}) is confirmed and saved. Reference{" "}
         <code>{String(registrationId || "").slice(0, 8)}</code>.
       </p>
 
@@ -444,6 +444,7 @@ function RegistrationConfirmed({ onboarding, registrationId, onClose }) {
 
 function Registration({ slug, onClose }) {
   const sport = SPORTS[slug];
+  const eligibility = eligibilityFor(slug);
   const formRef = useRef(null);
   const sectionRef = useRef(null);
   const [cart, setCart] = useState([]);
@@ -507,13 +508,13 @@ function Registration({ slug, onClose }) {
     if (!form.reportValidity() || !validateGroups(form)) return;
 
     const data = formDataObject(form);
-    if (!isNoidaResident(data.residence_city)) {
-      setStatus({ type: "error", text: ELIGIBILITY.cityError });
+    if (!isEligibleResident(data.residence_city, slug)) {
+      setStatus({ type: "error", text: eligibility.cityError });
       return;
     }
     data.residency_confirmed = form.elements.residency_confirmed?.checked === true;
     if (!data.residency_confirmed) {
-      setStatus({ type: "error", text: "Please confirm the participant is a resident of Noida to continue." });
+      setStatus({ type: "error", text: eligibility.cityError });
       return;
     }
     if (slug === "badminton" && asArray(data.badminton_events).some((item) => /Doubles/i.test(item)) && !String(data.partner_name || "").trim()) {
@@ -632,6 +633,11 @@ function Registration({ slug, onClose }) {
               <h3>Before you register</h3>
               <ul>{sport.rules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
             </div>
+            {slug === "chess" && <div className="rules-block">
+              <h3>Rewards in every category</h3>
+              <ul>{sport.benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
+              <p>Tournament Director: Jotish Joy<br />Tournament Organizer: Chirag Gulati</p>
+            </div>}
             <div className="organiser-block">
               <h3>Organiser contacts</h3>
               <ul>
@@ -689,10 +695,10 @@ function Registration({ slug, onClose }) {
                   ))}
                 </div>
               </div>
-              <p className="eligibility-notice" role="note">{ELIGIBILITY.formNotice}</p>
+              <p className="eligibility-notice" role="note">{eligibility.formNotice}</p>
               <label className="residency-confirm">
                 <input type="checkbox" name="residency_confirmed" required />
-                <span>{ELIGIBILITY.confirm}</span>
+                <span>{eligibility.confirm}</span>
               </label>
               <div className="payment-panel">
                 <div>

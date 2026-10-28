@@ -298,3 +298,32 @@ test("organiser pending JSON and CSV exclude paid retries and duplicate attempts
     });
   }
 });
+
+
+test("chess accepts Greater Noida at ₹100 and rejects stale or multiple categories", async () => {
+  const options = SPORTS.chess.fields[0].options;
+  assert.equal(options.length, 6);
+  assert.ok(options.includes("Under-10 - 1 November"));
+  const base = { participant_name: "Chess Test", event: "Chess", category_slug: "chess", address: "Greater Noida", residence_city: "Greater Noida", residency_confirmed: true, contact: "9876543210" };
+  let charged;
+  await withFetch(async (url, init = {}) => {
+    if (String(url).endsWith("/v1/orders")) {
+      charged = JSON.parse(init.body).amount;
+      return Response.json({ id: "order_chess", amount: charged, currency: "INR" });
+    }
+    if (init.method === "POST") return Response.json([JSON.parse(init.body)]);
+    return Response.json([]);
+  }, async () => {
+    const response = await createOrder(context("create-order", { ...base, cart_items: [{ label: options[5] }] }));
+    assert.equal(response.status, 200);
+    assert.equal(charged, 10000);
+  });
+  await withFetch(() => { throw new Error("Invalid chess entries must not reach APIs"); }, async () => {
+    for (const labels of [["Under-5 - 1 November"], options.slice(0, 2)]) {
+      const response = await createOrder(context("create-order", { ...base, cart_items: labels.map(label => ({ label })) }));
+      assert.equal(response.status, 400);
+    }
+    const response = await createOrder(context("create-order", { ...base, residence_city: "Delhi", cart_items: [{ label: options[0] }] }));
+    assert.equal(response.status, 422);
+  });
+});

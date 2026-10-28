@@ -8,13 +8,28 @@ export const NTH_S2 = Object.freeze({
 });
 
 export const ELIGIBILITY = Object.freeze({
-  hero: "Eligibility: Open exclusively to residents of Noida. Participants residing in Delhi or other cities are not eligible.",
-  lineup: "Participation is restricted to athletes residing in Noida. All registrations are subject to residency verification.",
+  hero: "Open to Noida residents. Chess also welcomes Greater Noida residents.",
+  lineup: "All sports welcome Noida residents. Chess also welcomes Greater Noida residents. Residency verification applies.",
   formNotice: "Important Eligibility Notice: Noida Sports Talent Hunt 2026 is exclusively for residents of Noida. Participants residing outside Noida, including Delhi, are not eligible to register.",
   confirm: "I confirm that the participant is a resident of Noida and meets the event's eligibility requirements.",
   term: "Participation in Noida Sports Talent Hunt 2026 is restricted to athletes residing in Noida. Organisers reserve the right to verify residency and reject registrations that do not meet the eligibility requirements.",
   cityError: "Noida Sports Talent Hunt 2026 is exclusively for residents of Noida. Participants residing outside Noida, including Delhi, are not eligible to register.",
 });
+
+export const CHESS_ELIGIBILITY = Object.freeze({
+  formNotice: "Chess is exclusively for residents of Noida and Greater Noida. All registrations are subject to residency verification.",
+  confirm: "I confirm that the participant resides in Noida or Greater Noida and meets the chess eligibility requirements.",
+  term: "Chess participation is restricted to residents of Noida and Greater Noida. Organisers may verify residency and reject ineligible registrations.",
+  cityError: "Chess is exclusively for residents of Noida and Greater Noida. Please confirm residency to continue.",
+});
+
+export function eligibilityFor(slug) {
+  return slug === "chess" ? CHESS_ELIGIBILITY : ELIGIBILITY;
+}
+
+export function isEligibleResident(city, slug) {
+  return isNoidaResident(city) || (slug === "chess" && String(city || "").trim().toLowerCase() === "greater noida");
+}
 
 // Only "Noida" proceeds. Greater Noida is deliberately not auto-accepted (policy not yet approved).
 export const RESIDENCE_CITIES = Object.freeze([
@@ -213,39 +228,38 @@ export const SPORTS = {
     "dates": NTH_S2.dates,
     "seo": {
       "ogImage": "/archive/chess-wide.webp",
-      "description": "Chess categories, eligibility and registration details for Noida Talent Hunt S2 in Noida.",
+      "description": "Chess on 31 October and 1 November 2026: six age categories for boys and girls from Noida and Greater Noida. ₹100 per player at Prometheus School.",
     },
-    "venue": "Prometheus School, Noida",
-    "fee": "₹100 per selected event/category",
+    "venue": "Prometheus School, Jaypee Wishtown, 1-7, Asgerpur, Sector 131, Noida, UP 201304",
+    "fee": "₹100 per player",
     "whatsapp": "https://chat.whatsapp.com/Fkp0QDQfe8mKj4ISLhhPFA",
-    "intro": "Chess registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
+    "intro": "Turning promise into progress. Two days of competitive chess for boys and girls across six age categories, exclusively for residents of Noida and Greater Noida. Day 1 (31 October): Under-11, Under-13 and Under-15. Day 2 (1 November): Under-6, Under-8 and Under-10.",
     "rules": [
-      "Select at most 3 age-category options.",
-      "Category eligibility is based on the date of birth cut-off mentioned for each age group.",
+      "Select one eligible age category. Entry is ₹100 per player.",
+      "Boys and girls compete in every category. The organising team will confirm date-of-birth eligibility; bring ID proof.",
       "FIDE ID can be entered if applicable; otherwise write NA.",
       "FIDE Rating can be entered as 0 if not rated."
     ],
     "benefits": [
-      "Participation Certificate",
+      "Trophies for the top 3 boys and top 3 girls in every category",
+      "Medals for boys and girls ranked 4th to 10th in every category",
       "Sports scholarship consideration",
       "High-performance training pathway",
       "Category-wise organiser updates"
     ],
     "fields": [
       {
-        "type": "checkbox",
+        "type": "radio",
         "name": "chess_age_categories",
-        "label": "Select Chess Age Category (max 3) - ₹100 each",
-        "max": 3,
+        "label": "Select Chess Age Category - ₹100 per player",
+        "max": 1,
         "options": [
-          "Under-11 (Born on or after 01/01/2015) - 31 October",
-          "Under-13 (Born on or after 01/01/2013) - 31 October",
-          "Under-15 (Born on or after 01/01/2011) - 31 October",
-          "Under-6 (Born on or after 01/01/2020) - 1 November",
-          "Under-8 (Born on or after 01/01/2018) - 1 November",
-          "Under-5 (Born on or after 01/01/2021) - 1 November",
-          "Under-7 (Born on or after 01/01/2019) - 1 November",
-          "Under-12 (Born on or after 01/01/2014) - 1 November"
+          "Under-11 - 31 October",
+          "Under-13 - 31 October",
+          "Under-15 - 31 October",
+          "Under-6 - 1 November",
+          "Under-8 - 1 November",
+          "Under-10 - 1 November"
         ]
       },
       {
@@ -263,21 +277,21 @@ export const SPORTS = {
     ],
     "lastDay": "Registration open - deadline to be announced",
     "contacts": [
-      "8587030989 - Mr. Karamvir Dagar",
-      "8813980162 - Mr. Gaurav Bisht"
+      "9821147231 - Gautam Sharma · Registration & queries",
+      "9953659468 - Chess queries"
     ],
     "parentInfo": [
       {
         "title": "Participation",
-        "text": "Individual chess participation is available across all restored age categories."
+        "text": "Tournament Director: Jotish Joy. Tournament Organizer: Chirag Gulati. Boys and girls compete in all six age categories."
       },
       {
         "title": "Age/category logic",
-        "text": "Select the correct category based on date of birth and the final October age eligibility confirmation."
+        "text": "31 October: U-11, U-13, U-15. 1 November: U-6, U-8, U-10. Select the eligible category for the participant."
       },
       {
         "title": "Event options",
-        "text": "Select up to three eligible chess age categories. Each selected category adds ₹100."
+        "text": "Select one eligible chess age category. Entry is ₹100 per player."
       },
       {
         "title": "Bring / prepare",
@@ -388,15 +402,17 @@ export const SPORTS = {
   "gymnastics": {
     "title": "Gymnastics",
     "arena": "Noida Sports Talent Hunt",
-    "dates": NTH_S2.dates,
+    "dates": "31 October 2026",
+    "startDate": "2026-10-31",
+    "endDate": "2026-10-31",
     "seo": {
       "ogImage": "/archive/gymnastics-jump.webp",
-      "description": "Gymnastics categories, eligibility and registration details for Noida Talent Hunt S2 in Noida.",
+      "description": "Gymnastics on 31 October 2026 only: categories, eligibility and registration details for Noida Talent Hunt S2 in Noida.",
     },
     "venue": "Prometheus School, Noida",
     "fee": "₹100 per selected event/category",
     "whatsapp": "https://chat.whatsapp.com/DE4j2DvqIezAtmyIMsdfv4",
-    "intro": "Gymnastics registrations are open for Noida Talent Hunt S2 on 31 October and 1 November 2026. Reporting time and final eligibility checks will be confirmed by the organising team.",
+    "intro": "Gymnastics registrations are open for Noida Talent Hunt S2 on 31 October 2026 only. Reporting time and final eligibility checks will be confirmed by the organising team.",
     "rules": [
       "All performances will be evaluated as per the FIG Code of Points.",
       "A modified element list will apply for gymnasts aged 6-12 years.",
@@ -589,6 +605,6 @@ export const SPORT_ORDER = [
   "shooting",
 ];
 
-Object.values(SPORTS).forEach((sport) => {
-  sport.rules = [...sport.rules, ELIGIBILITY.term];
+Object.entries(SPORTS).forEach(([slug, sport]) => {
+  sport.rules = [...sport.rules, eligibilityFor(slug).term];
 });

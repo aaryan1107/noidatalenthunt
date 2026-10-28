@@ -1,6 +1,6 @@
 import { eventIsOpen, getRegistrationAvailability } from "./_registration-availability.js";
 import { withErrorStatus } from "./_http-errors.js";
-import { ELIGIBILITY, NTH_S2, SPORTS, isNoidaResident } from "../../src/data/sports.js";
+import { NTH_S2, SPORTS, eligibilityFor, isEligibleResident } from "../../src/data/sports.js";
 
 const PRICE_PER_ITEM = 10000; // Rs. 100 in paise
 const REGISTRATION_TABLE = "registrations_october_2026";
@@ -100,10 +100,10 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
-    if (!isNoidaResident(body.residence_city) || body.residency_confirmed !== true) {
+    if (!isEligibleResident(body.residence_city, categorySlug) || body.residency_confirmed !== true) {
       return jsonResponse({
         success: false,
-        error: ELIGIBILITY.cityError
+        error: eligibilityFor(categorySlug).cityError
       }, 422);
     }
 
@@ -126,8 +126,8 @@ export async function onRequestPost(context) {
     }
 
     // Check the current catalogue so stale tabs cannot buy removed categories.
-    if (["badminton", "table-tennis"].includes(categorySlug)) {
-      const field = SPORTS[categorySlug].fields.find(field => field.type === "checkbox");
+    if (["badminton", "table-tennis", "chess"].includes(categorySlug)) {
+      const field = SPORTS[categorySlug].fields.find(field => field.options);
       if (cartItems.some(item => !field.options.includes(item.label))) {
         return jsonResponse({
           success: false,
@@ -144,6 +144,10 @@ export async function onRequestPost(context) {
         success: false,
         error: "Table Tennis allows a maximum of 2 categories only."
       }, 400);
+    }
+
+    if (categorySlug === "chess" && cartItems.length !== 1) {
+      return jsonResponse({ success: false, error: "Select one chess age category. Entry is ₹100 per player." }, 400);
     }
 
     const amount = cartItems.length * PRICE_PER_ITEM;
